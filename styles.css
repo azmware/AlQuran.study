@@ -16,13 +16,7 @@
   border-right: 1px solid var(--border);
   padding-right: 16px;
 }
-/* Shortnote ruby styling */
-.short-note-ruby {
-  font-size: 14px;
-  color: var(--text-secondary);
-  font-style: italic;
-  transition: font-size 0.2s;
-}
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
 :root {
@@ -659,7 +653,7 @@ body {
 }
 
 .short-note-ruby {
-  font-size: 0.8em !important;
+  font-size: 10px;
   color: var(--text-secondary) !important;
   background: rgba(58, 175, 169, 0.1) !important;
   padding: 1px 3px !important;

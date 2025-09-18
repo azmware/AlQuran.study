@@ -7,7 +7,6 @@
   order: 2;
   flex: 1;
   text-align: right;
-  border-left: 1px solid var(--border);
   padding-left: 16px;
 }
 .column-arabic-right .trans-cell {
@@ -120,7 +119,7 @@ body {
   border: 1px solid var(--border);
   background: var(--accent-light);
   font-size: 0.9em;
-  width: 150px;
+  width: 200px;
   outline: none;
 }
 
@@ -639,10 +638,10 @@ body {
   font-weight: 500;
 }
 
-.note-superscript:hover {
+/* .note-superscript:hover {
   background: #3aafa9;
   color: #fff;
-}
+} */
 
 .short-note {
   font-size: 0.8em;
@@ -759,7 +758,7 @@ mark {
   }
 
   .settings-btn {
-    margin: 10px 12px;
+    margin: 10px 8px 12px 12px;
   }
 
   .search-group {
@@ -839,7 +838,13 @@ mark {
 @media (max-width: 720px) {
   .ayah-row {
     flex-direction: column;
+    align-items: flex-end;
     padding: 8px;
+  }
+
+  /* When column layout toggle is active on mobile, reverse the order */
+  .column-arabic-right .ayah-row {
+    flex-direction: column-reverse;
   }
 
   .hamburger {
@@ -870,8 +875,15 @@ mark {
   }
 
   .search-group {
-    width: 100%;
+    width: 80vw;
     justify-content: space-between;
+  }
+
+  .goto-group {
+    width: 80vw;
+  }
+  .ayat-input {
+   width: 40% !important;
   }
 
   .search-input {
@@ -1200,6 +1212,32 @@ mark {
   font-family: monospace;
 }
 
+/* Ensure scrollbars are visible in note modal */
+.note-modal-body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent, #007bff) #f0f0f0;
+  margin-bottom: 30px;
+}
+
+/* Webkit scrollbar styling for note modal */
+.note-modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.note-modal-body::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.note-modal-body::-webkit-scrollbar-thumb {
+  background: var(--accent, #007bff);
+  border-radius: 4px;
+}
+
+.note-modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-dark, #0056b3);
+}
+
 .reference-content-wrapper {
   margin: 15px 0;
   clear: both;
@@ -1342,7 +1380,6 @@ mark {
   width: 100%;
   height: 100%;
   background: rgba(44, 62, 80, 0.18);
-  backdrop-filter: blur(2px);
 }
 
 .note-modal-content {

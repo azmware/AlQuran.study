@@ -476,6 +476,11 @@ async function getUniqueTags() {
 }
 
 async function getAyatsByTag(tag) {
+   const resultsSection = document.getElementById('total-results-found');
+   if (resultsSection) {
+      resultsSection.style.display = 'none';
+      resultsSection.innerHTML = '';
+   }
    if (!tag) return [];
    const arr = await fetchSheet("Annotation");
    return arr.filter(r => r["TagName"] === tag).map(r => ({
@@ -489,7 +494,7 @@ async function getAyatsByTag(tag) {
 function lsGet(key, def) { try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch (e) { return def; } }
 function lsSet(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-function getBookmarks() { return lsGet('bookmarks', []); }
+function getBookmarks() { return lsGet('bookmarks'); }
 function addBookmark(obj) {
    const list = getBookmarks();
    list.push(obj);
@@ -622,7 +627,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 document.getElementById("arabicPlus")?.addEventListener("click", () => {
    if (arabicSize < 48) {
-      arabicSize += 2;
+      arabicSize += 1;
       document.querySelectorAll('.arabic-cell').forEach(el => el.style.fontSize = arabicSize + "px");
       const valEl = document.getElementById('arabicSizeValue');
       if (valEl) valEl.textContent = arabicSize;
@@ -630,7 +635,7 @@ document.getElementById("arabicPlus")?.addEventListener("click", () => {
 });
 document.getElementById("arabicMinus")?.addEventListener("click", () => {
    if (arabicSize > 16) {
-      arabicSize -= 2;
+      arabicSize -= 1;
       document.querySelectorAll('.arabic-cell').forEach(el => el.style.fontSize = arabicSize + "px");
       const valEl = document.getElementById('arabicSizeValue');
       if (valEl) valEl.textContent = arabicSize;
@@ -638,7 +643,7 @@ document.getElementById("arabicMinus")?.addEventListener("click", () => {
 });
 document.getElementById("transPlus")?.addEventListener("click", () => {
    if (transSize < 28) {
-      transSize += 2;
+      transSize += 1;
       document.querySelectorAll('.trans-cell').forEach(el => el.style.fontSize = transSize + "px");
       const valEl = document.getElementById('transSizeValue');
       if (valEl) valEl.textContent = transSize;
@@ -646,7 +651,7 @@ document.getElementById("transPlus")?.addEventListener("click", () => {
 });
 document.getElementById("transMinus")?.addEventListener("click", () => {
    if (transSize > 12) {
-      transSize -= 2;
+      transSize -= 1;
       document.querySelectorAll('.trans-cell').forEach(el => el.style.fontSize = transSize + "px");
       const valEl = document.getElementById('transSizeValue');
       if (valEl) valEl.textContent = transSize;
@@ -657,7 +662,7 @@ document.getElementById("transMinus")?.addEventListener("click", () => {
 let shortnoteSize = parseInt(localStorage.getItem('shortnoteSize') || '14');
 document.getElementById("shortnotePlus")?.addEventListener("click", () => {
    if (shortnoteSize < 28) {
-      shortnoteSize += 2;
+      shortnoteSize += 1;
       localStorage.setItem('shortnoteSize', shortnoteSize);
       document.querySelectorAll('.short-note-ruby').forEach(el => el.style.fontSize = shortnoteSize + "px");
       const valEl = document.getElementById('shortnoteSizeValue');
@@ -666,7 +671,7 @@ document.getElementById("shortnotePlus")?.addEventListener("click", () => {
 });
 document.getElementById("shortnoteMinus")?.addEventListener("click", () => {
    if (shortnoteSize > 8) {
-      shortnoteSize -= 2;
+      shortnoteSize -= 1;
       localStorage.setItem('shortnoteSize', shortnoteSize);
       document.querySelectorAll('.short-note-ruby').forEach(el => el.style.fontSize = shortnoteSize + "px");
       const valEl = document.getElementById('shortnoteSizeValue');
@@ -686,7 +691,7 @@ function toggleShowTrans(show) {
 
 function toggleShowSurahAyat(show) {
    document.querySelectorAll('.trans-cell .cell-meta').forEach(el => {
-      el.style.display = show ? 'block' : 'none';
+      el.style.display = show ? 'inline' : 'none';
    });
 }
 
@@ -938,15 +943,15 @@ function getMobileDefaults() {
    return {
       direction: 'column',
       alignment: 'center',
-      margin: 0.2,
+      margin: 0,
       padding: 0,
       gap: 0,
       topFontSize: 1,
-      bottomFontSize: 0.6,
+      bottomFontSize: 0.7,
       lineHeight: 1,
       letterSpacing: 0,
       topOffset: 5,
-   bottomOffset: -4
+      bottomOffset: -4
    };
 }
 
@@ -954,15 +959,15 @@ function getDesktopDefaults() {
    return {
       direction: 'column',
       alignment: 'center',
-      margin: 0.2,
+      margin: 0,
       padding: 0,
       gap: 0,
-   topFontSize: 1,
-   bottomFontSize: 0.7,
-   lineHeight: 0,
-   letterSpacing: 0,
-   topOffset: 5,
-   bottomOffset: 12
+      topFontSize: 1,
+      bottomFontSize: 0,
+      lineHeight: 0,
+      letterSpacing: 0,
+      topOffset: 5,
+      bottomOffset: 10
    };
 }
 
@@ -1263,6 +1268,16 @@ document.getElementById('searchBtn')?.addEventListener('click', async () => {
    try {
       const res = isFullSearch ? await searchTranslationsAndAnnotations(q) : await searchTranslations(q);
       if (res && res.length) {
+         // Clear previous results and hide surah name
+         readerRows.innerHTML = '';
+         const surahNameEl = document.getElementById('surah-name-current');
+         const resultsSection = document.getElementById('total-results-found');
+         if (resultsSection) {
+            resultsSection.style.display = 'block';
+            resultsSection.innerHTML = '';
+         }
+         if (surahNameEl) surahNameEl.style.display = 'none';
+
          // Show search summary first
          const summaryEl = document.createElement('div');
          summaryEl.className = 'search-summary';
@@ -1273,8 +1288,9 @@ document.getElementById('searchBtn')?.addEventListener('click', async () => {
          } else {
             summaryText = `Found ${res.length} Ayats matching "${q}" in Translation`;
          }
+         console.log(summaryText)
          summaryEl.innerHTML = summaryText;
-         readerRows.appendChild(summaryEl);
+         resultsSection.appendChild(summaryEl);
          renderSearchResults(res);
       } else {
          alert(`No results found for "${q}"`);
@@ -1318,9 +1334,15 @@ function renderSurahs(list) {
 function showSurahName(surah) {
    const sInfo = completeSurahList?.find(s => parseInt(s.SurahNumber) === parseInt(surah));
    if (sInfo) {
+      const resultsSection = document.getElementById('total-results-found');
+      if (resultsSection) {
+         resultsSection.style.display = 'none';
+         resultsSection.innerHTML = '';
+      }
       const el = document.getElementById("surah-name-current");
       if (el) {
-         el.innerHTML = `${sInfo.SurahNameTransliteration} (${sInfo.SurahNameArabic})<br>${sInfo.SurahNameEnglish || ''}`;
+         el.innerHTML = `${sInfo.SurahNumber}. ${sInfo.SurahNameTransliteration} (${sInfo.SurahNameArabic})<br>${sInfo.SurahNameEnglish || ''}`;
+         el.style.display = 'block';
       }
    }
 }
@@ -1349,15 +1371,17 @@ function renderTags(tags) {
             grouped[sNum].push(item);
          });
          const surahNums = Object.keys(grouped).map(Number).sort((a, b) => a - b);
-         // Clear previous results and render collapsible list
+         // Clear previous results and render collapsible list, hide surah name
          readerRows.innerHTML = '';
+         const surahNameEl = document.getElementById('surah-name-current');
+         if (surahNameEl) surahNameEl.style.display = 'none';
          surahNums.forEach(surahNum => {
             const surahInfo = completeSurahList?.find(s => parseInt(s.SurahNumber) === surahNum);
             const surahName = surahInfo ? `${surahInfo.SurahNumber}. ${surahInfo.SurahNameTransliteration} (${surahInfo.SurahNameEnglish || surahInfo.SurahNameArabic})` : `Surah ${surahNum}`;
             const header = document.createElement('div');
             header.className = 'surah-header collapsible collapsed';
             header.style.cssText = 'background: var(--card-bg); border: 1px solid var(--border); padding: 12px 16px; margin: 8px 0; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--accent); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;';
-            header.innerHTML = `<span>${surahName}</span><small style="color: var(--text-secondary); font-weight: normal; margin-left: 8px;">${grouped[surahNum].length} ayats</small><span style='transition: transform 0.2s ease; transform: rotate(-90deg);'>▼</span>`;
+            header.innerHTML = `<span>${surahName}<small style="color: var(--text-secondary); font-weight: normal; margin-left: 8px;">${grouped[surahNum].length} Ayats</small></span><span style='transition: transform 0.2s ease; transform: rotate(-90deg);'>▼</span>`;
             const content = document.createElement('div');
             content.className = 'surah-content';
             content.style.cssText = 'display: none; margin-bottom: 16px;';
@@ -1388,7 +1412,8 @@ function renderTags(tags) {
                         }
 
                         // Prepare annotation data for this ayah
-                        const annsForAyah = []; // No annotation data in this context, so keep empty
+                        const anns = await getAnnotationsBySurah(surahNum);
+                        const annsForAyah = anns.filter(ann => parseInt(ann.AyatNumber) === ayahNum);
 
                         const row = document.createElement('div');
                         row.className = 'ayah-row card-simple';
@@ -1710,6 +1735,17 @@ async function applyAnnotationsToText(text, annotations) {
                rubyElement.appendChild(rbElement);
                rubyElement.appendChild(rtElement);
                charSpan.appendChild(rubyElement);
+               
+               // Calculate margin-left based on shortnote text length
+               const nextSpan = charSpan.nextElementSibling;
+               if (nextSpan && nextSpan.tagName === 'SPAN') {
+                  // Approximate character width calculation
+                  // Using shortnote font size and estimated character width
+                  const charWidth = shortnoteSize * 0.55; // Rough estimate: 0.6px per px of font size
+                  const textLength = note.text.length;
+                  const calculatedMargin = -(charWidth * textLength);
+                  nextSpan.style.marginLeft = calculatedMargin + 'px';
+               }
             } else {
                // For regular notes in superscript mode: keep original behavior
                const noteIconSpacing = parseFloat(localStorage.getItem('noteIconSpacing') || 2);
@@ -2113,7 +2149,7 @@ async function renderSearchResults(list) {
       const headerContent = document.createElement('div');
       headerContent.innerHTML = `
          <span>${surahName}</span>
-         <small style="color: var(--text-secondary); font-weight: normal; margin-left: 8px;">${surahResults.length} verses</small>
+         <small style="color: var(--text-secondary); font-weight: normal; margin-left: 8px;">${surahResults.length} Ayats</small>
       `;
 
       const chevron = document.createElement('span');
@@ -2159,21 +2195,27 @@ async function loadSurahAyahs(surahNum, results, container) {
       const arabicMap = {};
       (arabicData || []).forEach(a => { arabicMap[parseInt(a.index2)] = a; });
 
+      // Fetch annotations for this surah
+      const annotations = await getAnnotationsBySurah(surahNum);
+
       // Sort results by ayat number
       const sortedResults = results.sort((a, b) => parseInt(a.AyatNumber) - parseInt(b.AyatNumber));
 
-      sortedResults.forEach(r => {
+      for (const r of sortedResults) {
          const ayahNum = parseInt(r.AyatNumber);
          const arabic = arabicMap[ayahNum];
+
+         // Get annotations for this specific ayah
+         const annsForAyah = annotations.filter(ann => parseInt(ann.AyatNumber) === ayahNum);
 
          const row = document.createElement('div');
          row.className = 'ayah-row card-simple';
          row.dataset.ayat = ayahNum;
          row.style.margin = '8px 0';
 
-          const arabicCell = document.createElement('div');
-          arabicCell.className = 'arabic-cell';
-          arabicCell.innerHTML =
+         const arabicCell = document.createElement('div');
+         arabicCell.className = 'arabic-cell';
+         arabicCell.innerHTML =
             '<div class="cell-meta"></div>' +
             '<div class="arabic-text">' +
             (arabic ? escapeHtml(arabic.text) : '<i style="color:#9ca3af">[Arabic not loaded]</i>') +
@@ -2183,11 +2225,11 @@ async function loadSurahAyahs(surahNum, results, container) {
             '</span>' +
             '</div>'; // end of line marker
 
-          // Helper function to convert numbers to Arabic-Indic numerals
-          function toArabicNumerals(num) {
+         // Helper function to convert numbers to Arabic-Indic numerals
+         function toArabicNumerals(num) {
             const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
             return String(num).split('').map(d => arabicDigits[parseInt(d, 10)] ?? d).join('');
-          }
+         }
 
          const transCell = document.createElement('div');
          transCell.className = 'trans-cell';
@@ -2195,10 +2237,14 @@ async function loadSurahAyahs(surahNum, results, container) {
          // Add match type indicator
          const matchTypeHTML = r.matchType ? `<span class="match-type" style="background: var(--accent-light); color: var(--accent); padding: 2px 6px; border-radius: 12px; font-size: 0.8em; margin-left: 8px;">${r.matchType}</span>` : '';
 
+         // Apply annotations to translation text
+         let translationWithAnnotations = r.AyatTranslationText || '';
+         translationWithAnnotations = await applyAnnotationsToText(translationWithAnnotations, annsForAyah);
+
          transCell.innerHTML =
             '<div class="trans-text">' +
             '<span class="cell-meta">' + surahNum + ':' + ayahNum + matchTypeHTML + '</span> ' +
-            escapeHtml(r.AyatTranslationText || '') +
+            (translationWithAnnotations || '<i style="color:#9ca3af">[No translation found]</i>') +
             (r.Translator ? ' <span class="trans-meta-translator">(' + r.Translator + ')</span>' : '') +
             '</div>';
 
@@ -2223,7 +2269,7 @@ async function loadSurahAyahs(surahNum, results, container) {
          });
 
          container.appendChild(row);
-      });
+      }
 
       // Apply font sizes
       container.querySelectorAll('.arabic-cell').forEach(el => el.style.fontSize = arabicSize + "px");

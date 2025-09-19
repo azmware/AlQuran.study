@@ -3,12 +3,14 @@
   display: flex;
   flex-direction: row;
 }
+
 .column-arabic-right .arabic-cell {
   order: 2;
   flex: 1;
   text-align: right;
   padding-left: 16px;
 }
+
 .column-arabic-right .trans-cell {
   order: 1;
   flex: 1;
@@ -97,6 +99,7 @@ body {
   letter-spacing: 0.02em;
   text-shadow: 0 1px 0 #def2f1;
   margin: 0;
+  white-space: nowrap;
 }
 
 .main-controls {
@@ -366,8 +369,36 @@ body {
   white-space: pre-wrap;
   color: var(--muted);
   font-size: 0.8em;
-  max-height: 100px;
+  max-height: 200px;
   overflow-y: auto;
+}
+
+/* Hierarchical Bookmark Styles */
+.bookmark-item {
+  margin: 2px 0;
+}
+
+.bookmark-list-link {
+  display: block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.bookmark-list-link:hover {
+  background-color: var(--accent-light, rgba(0, 123, 255, 0.1));
+  text-decoration: none;
+}
+
+.bookmark-toggle {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.bookmark-children {
+  border-left: 1px solid var(--border, #e0e0e0);
+  margin-left: 8px;
+  padding-left: 4px;
 }
 
 /* Settings Panel */
@@ -655,7 +686,6 @@ body {
 .short-note-ruby {
   font-size: 10px;
   color: var(--text-secondary) !important;
-  background: rgba(58, 175, 169, 0.1) !important;
   padding: 1px 3px !important;
   border-radius: 3px !important;
   font-style: italic !important;
@@ -831,8 +861,9 @@ mark {
 /* Keep small devices stacking */
 @media (max-width: 720px) {
   .ayah-row {
+    display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: flex-end !important;
     padding: 8px;
   }
 
@@ -876,8 +907,9 @@ mark {
   .goto-group {
     width: 80vw;
   }
+
   .ayat-input {
-   width: 40% !important;
+    width: 40% !important;
   }
 
   .search-input {
@@ -1125,11 +1157,23 @@ mark {
   min-width: 280px;
   min-height: 120px;
   resize: both;
-  overflow: auto;
-  max-height: 80%;
   overflow: hidden;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18);
   border: 1px solid var(--border);
+}
+
+/* Mobile-specific styles for note modal */
+@media (max-width: 768px) {
+  .note-modal-content {
+    width: 95%;
+    max-width: none;
+    max-height: 90vh;
+    resize: none;
+    /* Disable resize on mobile */
+  }
 }
 
 .note-modal-header {
@@ -1158,12 +1202,18 @@ mark {
 .note-modal-body {
   padding: 18px;
   overflow-y: auto;
-  max-height: calc(80vh - 60px);
+  flex: 1;
   background: #f8fafc;
   user-select: text;
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
+  /* Force scrollbar visibility */
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent, #007bff) #f0f0f0;
+  margin-bottom: 30px;
+  /* Ensure scrollbar shows on mobile */
+  -webkit-overflow-scrolling: touch;
 }
 
 .note-modal-body * {
@@ -1206,12 +1256,7 @@ mark {
   font-family: monospace;
 }
 
-/* Ensure scrollbars are visible in note modal */
-.note-modal-body {
-  scrollbar-width: thin;
-  scrollbar-color: var(--accent, #007bff) #f0f0f0;
-  margin-bottom: 30px;
-}
+/* Scrollbar styles moved to main .note-modal-body definition above */
 
 /* Webkit scrollbar styling for note modal */
 .note-modal-body::-webkit-scrollbar {
@@ -1365,105 +1410,7 @@ mark {
 }
 
 
-.note-modal {
-  display: none;
-  position: fixed;
-  z-index: 9999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(44, 62, 80, 0.18);
-}
-
-.note-modal-content {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #fff;
-  border-radius: var(--radius);
-  width: 520px;
-  max-width: 95%;
-  max-height: 80%;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18);
-  border: 1px solid var(--border);
-}
-
-.note-modal-header {
-  padding: 16px 18px;
-  background: var(--accent);
-  color: white;
-  cursor: move;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top-left-radius: var(--radius);
-  border-top-right-radius: var(--radius);
-}
-
-.note-close {
-  cursor: pointer;
-  font-size: 24px;
-  color: #fff;
-  transition: color 0.2s;
-}
-
-.note-close:hover {
-  color: #def2f1;
-}
-
-.note-modal-body {
-  padding: 18px;
-  overflow-y: auto;
-  max-height: calc(80vh - 60px);
-  background: #f8fafc;
-  user-select: text;
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-}
-
-.note-modal-body * {
-  user-select: text;
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-}
-
-.note-modal-body p {
-  margin: 8px 0;
-  line-height: 1.6;
-}
-
-.note-modal-body h1,
-.note-modal-body h2,
-.note-modal-body h3 {
-  color: var(--accent);
-  margin: 12px 0 8px 0;
-}
-
-.note-modal-body ul,
-.note-modal-body ol {
-  margin: 8px 0;
-  padding-left: 20px;
-}
-
-.note-modal-body blockquote {
-  margin: 12px 0;
-  padding: 8px 12px;
-  border-left: 4px solid var(--accent);
-  background: var(--accent-light);
-  border-radius: 4px;
-}
-
-.note-modal-body code {
-  background: #e2e8f0;
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-family: monospace;
-}
+/* Duplicate note modal styles removed - keeping original definition above */
 
 @font-face {
   font-family: 'surah-name-v2-icon';

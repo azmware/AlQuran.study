@@ -89,33 +89,141 @@ async function fetchBookmarksFromSheet() {
          const cell = r.c[i];
          obj[h] = cell && cell.v !== null && cell.v !== undefined ? cell.v : '';
       });
-      return { Surah: obj["Surah"], Ayah: obj["Ayat"] };
+      return { 
+         BMID: obj["BMID"],
+         SurahNumber: obj["SurahNumber"], 
+         AyatNumber: obj["AyatNumber"],
+         BMName: obj["BMName"],
+         ParentBMID: obj["ParentBMID"]
+      };
    });
 }
 
-// Render bookmarks in left panel
+// Render bookmarks in left panel with hierarchical structure
 function renderBookmarks(bookmarks) {
    const preview = document.getElementById('bookmarkPreview');
    preview.innerHTML = '';
+   
+   // Build hierarchical structure
+   const bookmarkMap = new Map();
+   const rootBookmarks = [];
+   
+   // First pass: create map of all bookmarks
+   bookmarks.forEach(b => {
+      bookmarkMap.set(b.BMID, { ...b, children: [] });
+   });
+   
+   // Second pass: build parent-child relationships
+   bookmarks.forEach(b => {
+      if (b.ParentBMID && bookmarkMap.has(b.ParentBMID)) {
+         // This is a child bookmark
+         bookmarkMap.get(b.ParentBMID).children.push(bookmarkMap.get(b.BMID));
+      } else {
+         // This is a root bookmark (no parent or parent not found)
+         rootBookmarks.push(bookmarkMap.get(b.BMID));
+      }
+   });
+   
    const list = document.createElement('div');
    list.style.display = 'flex';
    list.style.flexDirection = 'column';
-   list.style.gap = '8px';
-   bookmarks.forEach(b => {
+   list.style.gap = '4px';
+   
+   // Render hierarchical bookmarks
+   function renderBookmarkItem(bookmark, level = 0) {
+      const item = document.createElement('div');
+      item.className = 'bookmark-item';
+      item.style.marginLeft = (level * 20) + 'px';
+      
+      // Create bookmark link/header
+      const header = document.createElement('div');
+      header.style.display = 'flex';
+      header.style.alignItems = 'center';
+      header.style.gap = '8px';
+      
+      // Collapse/expand indicator for items with children
+      if (bookmark.children.length > 0) {
+         const toggle = document.createElement('span');
+         toggle.className = 'bookmark-toggle';
+         toggle.textContent = '▼';
+         toggle.style.cursor = 'pointer';
+         toggle.style.fontSize = '12px';
+         toggle.style.transition = 'transform 0.2s';
+         toggle.style.color = 'var(--text-secondary)';
+         
+         toggle.onclick = () => {
+            const isCollapsed = childrenContainer.style.display === 'none';
+            childrenContainer.style.display = isCollapsed ? 'block' : 'none';
+            toggle.style.transform = isCollapsed ? 'rotate(0deg)' : 'rotate(-90deg)';
+         };
+         
+         header.appendChild(toggle);
+      } else {
+         // Add spacing for items without children
+         const spacer = document.createElement('span');
+         spacer.style.width = '20px';
+         header.appendChild(spacer);
+      }
+      
+      // Bookmark link
       const link = document.createElement('a');
       link.className = 'bookmark-list-link';
-      link.textContent = `${b.Surah}:${b.Ayah}`;
       link.href = '#';
-      link.style.textDecoration = 'underline';
+      link.style.textDecoration = 'none';
       link.style.color = 'var(--accent, #007bff)';
-      link.style.fontWeight = '500';
-      link.style.fontSize = '1em';
-      link.onclick = (e) => {
-         e.preventDefault();
-         gotoSurahAyah(b.Surah, b.Ayah);
-      };
-      list.appendChild(link);
+      link.style.fontWeight = level === 0 ? '600' : '500';
+      link.style.fontSize = level === 0 ? '1em' : '0.9em';
+      link.style.flex = '1';
+      
+      // Display bookmark name and surah:ayat info
+      if (bookmark.BMName) {
+         link.innerHTML = `<strong>${bookmark.BMName}</strong>`;
+         if (bookmark.SurahNumber && bookmark.AyatNumber) {
+            link.innerHTML += `<br><small style="color: var(--text-secondary);">${bookmark.SurahNumber}:${bookmark.AyatNumber}</small>`;
+         }
+      } else if (bookmark.SurahNumber && bookmark.AyatNumber) {
+         link.textContent = `${bookmark.SurahNumber}:${bookmark.AyatNumber}`;
+      } else {
+         link.textContent = 'Unnamed Bookmark';
+      }
+      
+      // Only add click handler if there's surah/ayat info
+      if (bookmark.SurahNumber && bookmark.AyatNumber) {
+         link.onclick = (e) => {
+            e.preventDefault();
+            gotoSurahAyah(bookmark.SurahNumber, bookmark.AyatNumber);
+         };
+         link.style.cursor = 'pointer';
+      } else {
+         link.style.cursor = 'default';
+         link.style.color = 'var(--text-secondary)';
+      }
+      
+      header.appendChild(link);
+      item.appendChild(header);
+      
+      // Children container
+      const childrenContainer = document.createElement('div');
+      childrenContainer.className = 'bookmark-children';
+      childrenContainer.style.display = 'block';
+      
+      // Render children
+      bookmark.children.forEach(child => {
+         childrenContainer.appendChild(renderBookmarkItem(child, level + 1));
+      });
+      
+      if (bookmark.children.length > 0) {
+         item.appendChild(childrenContainer);
+      }
+      
+      return item;
+   }
+   
+   // Render all root bookmarks
+   rootBookmarks.forEach(bookmark => {
+      list.appendChild(renderBookmarkItem(bookmark));
    });
+   
    preview.appendChild(list);
 }
 
@@ -130,7 +238,7 @@ function gotoSurahAyah(surah, ayah) {
 window.addEventListener('DOMContentLoaded', () => {
    document.getElementById('addBookmarkBtn')?.addEventListener('click', () => {
       const key = prompt('Developer only feature\nEnter key:');
-      if (key !== 'Test@bookmarks123') return alert('Invalid key');
+      if (key !== '7861') return alert('Invalid key');
       showBookmarkPrompt('Add Bookmark', [
          { label: 'Surah (1-114):', type: 'number', id: 'bookmarkSurah' },
          { label: 'Ayah (1-286):', type: 'number', id: 'bookmarkAyah' }
@@ -144,7 +252,7 @@ window.addEventListener('DOMContentLoaded', () => {
    });
    document.getElementById('fetchBookmarksBtn')?.addEventListener('click', async () => {
       const key = prompt('Developer only feature\nEnter key:');
-      if (key !== 'Test@bookmarks123') return alert('Invalid key');
+      if (key !== '7861') return alert('Invalid key');
       const bookmarks = await fetchBookmarksFromSheet();
       renderBookmarks(bookmarks);
    });
@@ -963,7 +1071,7 @@ function getDesktopDefaults() {
       padding: 0,
       gap: 0,
       topFontSize: 1,
-      bottomFontSize: 0,
+      bottomFontSize: 0.7,
       lineHeight: 0,
       letterSpacing: 0,
       topOffset: 5,
@@ -1736,15 +1844,24 @@ async function applyAnnotationsToText(text, annotations) {
                rubyElement.appendChild(rtElement);
                charSpan.appendChild(rubyElement);
                
-               // Calculate margin-left based on shortnote text length
+               // Calculate margin-left based on shortnote text visual width
                const nextSpan = charSpan.nextElementSibling;
                if (nextSpan && nextSpan.tagName === 'SPAN') {
-                  // Approximate character width calculation
-                  // Using shortnote font size and estimated character width
-                  const charWidth = shortnoteSize * 0.55; // Rough estimate: 0.6px per px of font size
+                  // Aggressive calculation to eliminate whitespace from ruby annotations
+                  const baseCharWidth = shortnoteSize * 0.5; // Increased multiplier for better compensation
                   const textLength = note.text.length;
-                  const calculatedMargin = -(charWidth * textLength);
-                  nextSpan.style.marginLeft = calculatedMargin + 'px';
+                  
+                  // Calculate full visual width of ruby text
+                  const rubyWidth = textLength * baseCharWidth;
+                  
+                  // Apply more aggressive margin to close the gap
+                  // Use 80% of calculated width for better compensation
+                  const calculatedMargin = -(rubyWidth * 0.8);
+                  
+                  // Apply margin if it would be at least -1px (more sensitive threshold)
+                  if (calculatedMargin <= -1) {
+                     nextSpan.style.marginLeft = calculatedMargin + 'px';
+                  }
                }
             } else {
                // For regular notes in superscript mode: keep original behavior
@@ -1814,15 +1931,22 @@ async function openNoteDialog(title, content) {
    // Add handlers for surah/ayat and annotation links
    await addSurahAyatLinkHandlers(modalBody);
 
-   // Close modal when clicking the X
-   modalClose.onclick = () => modal.style.display = 'none';
+   // Close modal when clicking the X - handle both click and touch for mobile compatibility
+   const closeModal = () => modal.style.display = 'none';
+   modalClose.onclick = closeModal;
+   modalClose.ontouchend = (e) => {
+      e.preventDefault();
+      closeModal();
+   };
 
-   // Close modal when clicking outside
-   modal.onclick = (e) => {
+   // Close modal when clicking outside - handle both click and touch events
+   const closeOnOutsideClick = (e) => {
       if (e.target === modal) {
          modal.style.display = 'none';
       }
    };
+   modal.onclick = closeOnOutsideClick;
+   modal.ontouchend = closeOnOutsideClick;
 
    // Make modal draggable (desktop and mobile)
    let isDragging = false;
@@ -2248,6 +2372,36 @@ async function loadSurahAyahs(surahNum, results, container) {
             (r.Translator ? ' <span class="trans-meta-translator">(' + r.Translator + ')</span>' : '') +
             '</div>';
 
+         // Add navigation controls
+         const navControls = document.createElement('div');
+         navControls.className = 'search-nav-controls';
+         navControls.style.cssText = 'margin-top: 8px; display: flex; gap: 8px; align-items: center;';
+         
+         const gotoBtn = document.createElement('button');
+         gotoBtn.className = 'goto-btn';
+         gotoBtn.innerHTML = '→ Go to ' + surahNum + ':' + ayahNum;
+         gotoBtn.style.cssText = 'background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em;';
+         gotoBtn.onclick = (e) => {
+            e.stopPropagation();
+            loadSurah(surahNum, ayahNum);
+         };
+         
+         const newWindowBtn = document.createElement('button');
+         newWindowBtn.className = 'new-window-btn';
+         newWindowBtn.innerHTML = '↗ New Window';
+         newWindowBtn.style.cssText = 'background: var(--card-bg); color: var(--text); border: 1px solid var(--border); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em;';
+         newWindowBtn.onclick = (e) => {
+            e.stopPropagation();
+            const url = new URL(window.location);
+            url.searchParams.set('surah', surahNum);
+            url.searchParams.set('ayat', ayahNum);
+            window.open(url.toString(), '_blank');
+         };
+         
+         navControls.appendChild(gotoBtn);
+         navControls.appendChild(newWindowBtn);
+         transCell.appendChild(navControls);
+
          // const copyBtn = document.createElement('button');
          // copyBtn.className = 'copy-link-btn';
          // copyBtn.title = 'Copy link';
@@ -2263,11 +2417,8 @@ async function loadSurahAyahs(surahNum, results, container) {
          row.appendChild(arabicCell);
          row.appendChild(transCell);
 
-         // Add click handler to load full surah at that ayah
-         row.addEventListener('click', () => {
-            loadSurah(surahNum, ayahNum);
-         });
-
+         // Removed automatic click navigation - now using explicit navigation controls
+         
          container.appendChild(row);
       }
 

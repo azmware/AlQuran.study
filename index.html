@@ -16,21 +16,26 @@
         <button id="menuToggle" class="hamburger">&#9776;</button>
       </div>
       <div class="top-center">
-  <div class="brand" style="cursor:pointer;" onclick="location.reload()">Al-Quran <span style="font-weight:normal">(<span style="font-weight:bold">القران</span>)</span> The Recital</div>
+        <div class="brand" style="cursor:pointer;" onclick="location.reload()">Al-Quran <span
+            style="font-weight:normal">(<span style="font-weight:bold">القران</span>)</span> The Recital</div>
         <div class="main-controls">
           <select id="surahDropdown" class="surah-selector">
             <option value="">Select Surah (Chapter)</option>
           </select>
           <div class="goto-group">
-            <input class="ayat-input" id="gotoSurah" type="number" placeholder="Surah #" min="1" max="114" maxlength="3" style="width:60px;" oninput="if(this.value.length>3)this.value=this.value.slice(0,3)">
-            <input class="ayat-input" id="gotoAyat" type="number" placeholder="Ayat #" min="1" max="286" maxlength="3" style="width:60px;" oninput="if(this.value.length>3)this.value=this.value.slice(0,3)">
+            <input class="ayat-input" id="gotoSurah" type="number" placeholder="Surah #" min="1" max="114" maxlength="3"
+              style="width:60px;" oninput="if(this.value.length>3)this.value=this.value.slice(0,3)">
+            <input class="ayat-input" id="gotoAyat" type="number" placeholder="Ayat #" min="1" max="286" maxlength="3"
+              style="width:60px;" oninput="if(this.value.length>3)this.value=this.value.slice(0,3)">
             <button id="gotoBtn" class="go-btn">Go</button>
           </div>
           <div class="search-group">
             <input id="searchText" placeholder="Search Translation" class="search-input">
             <button id="searchBtn" class="search-btn">🔍</button>
-            <label class="checkbox-label"><input type="checkbox" id="fullSearch" checked
-                title="Search in Translation and Notes"> Include Notes</label>
+            <label class="checkbox-label" style="white-space: pre-wrap;
+    width: 61px;"><input type="checkbox" id="fullSearch" checked title="Search in Translation and Notes">
+              <span>Include Notes</span>
+            </label>
           </div>
         </div>
       </div>
@@ -44,11 +49,11 @@
         <div class="font-controls" id="surah-name-current">
           Current Surah
         </div>
-          
+
       </div>
     </section>
 
-       <section>
+    <section>
       <div class="toolbar-new">
         <div class="font-controls" id="total-results-found" style="display: none;">
         </div>
@@ -85,165 +90,168 @@
         <div class="settings-section">
           <h3 class="settings-title collapsible" data-target="main-settings">⚙️ Settings</h3>
           <div id="main-settings" style="display:block;">
-          <div class="setting-group">
-            <label><input type="checkbox" id="toggleColumnLayout"> Arabic Right / English Left</label>
-          </div>
-          <div class="setting-group">
-            <label>Arabic Text Size</label>
-            <div class="size-controls">
-              <button class="btn size-btn" id="arabicMinus">-</button>
-              <span id="arabicSizeValue" class="size-value">28</span>
-              <button class="btn size-btn" id="arabicPlus">+</button>
+            <div class="setting-group">
+              <label><input type="checkbox" id="toggleColumnLayout"> Arabic Right / English Left</label>
             </div>
-          </div>
-          <div class="setting-group">
-            <label>Translation Size</label>
-            <div class="size-controls">
-              <button class="btn size-btn" id="transMinus">-</button>
-              <span id="transSizeValue" class="size-value">16</span>
-              <button class="btn size-btn" id="transPlus">+</button>
+            <div class="setting-group">
+              <label>Arabic Text Size</label>
+              <div class="size-controls">
+                <button class="btn size-btn" id="arabicMinus">-</button>
+                <span id="arabicSizeValue" class="size-value">28</span>
+                <button class="btn size-btn" id="arabicPlus">+</button>
+              </div>
             </div>
-          </div>
-          <div class="setting-group">
-            <label>Shortnote Size</label>
-            <div class="size-controls">
-              <button class="btn size-btn" id="shortnoteMinus">-</button>
-              <span id="shortnoteSizeValue" class="size-value">14</span>
-              <button class="btn size-btn" id="shortnotePlus">+</button>
+            <div class="setting-group">
+              <label>Translation Size</label>
+              <div class="size-controls">
+                <button class="btn size-btn" id="transMinus">-</button>
+                <span id="transSizeValue" class="size-value">16</span>
+                <button class="btn size-btn" id="transPlus">+</button>
+              </div>
             </div>
-          </div>
-          <div class="setting-group">
-            <label><input type="checkbox" id="showTranslatorSettings" checked> Show Translator</label>
-          </div>
-          <div class="setting-group">
-            <label><input type="checkbox" id="hideSurahAyat" checked> Show Surah:Ayat in Translation</label>
-          </div>
-          <div class="setting-group">
-            <label>Arabic Font Style</label>
-            <select id="arabicFontStyle" class="setting-input">
-              <option value="uthmani">Uthmani Script</option>
-              <option value="indo-pak">Indo Pak Script</option>
-            </select>
-          </div>
-
-          <!-- Dual Word Settings -->
-          <div class="settings-section">
-            <h3 class="settings-title collapsible collapsed" data-target="dual-word-settings">Parallel Word Settings</h3>
-            <div id="dual-word-settings" class="dual-word-controls" style="display: none;">
-              <div class="setting-row">
-                <label>Direction:</label>
-                <select id="dualWordDirection" class="setting-input">
-                  <option value="column">Vertical</option>
-                  <option value="row">Horizontal</option>
-                </select>
+            <div class="setting-group">
+              <label>Shortnote Size</label>
+              <div class="size-controls">
+                <button class="btn size-btn" id="shortnoteMinus">-</button>
+                <span id="shortnoteSizeValue" class="size-value">14</span>
+                <button class="btn size-btn" id="shortnotePlus">+</button>
               </div>
-
-              <div class="setting-row">
-                <label>Alignment:</label>
-                <select id="dualWordAlignment" class="setting-input">
-                  <option value="center">Center</option>
-                  <option value="flex-start">Top/Left</option>
-                  <option value="flex-end">Bottom/Right</option>
-                </select>
-              </div>
-
-              <div class="setting-row">
-                <label>Margin:</label>
-                <input type="number" id="dualWordMargin" class="setting-input" step="0.1" value="0.2" min="0" max="2">
-                <span class="unit">em</span>
-              </div>
-
-              <div class="setting-row">
-                <label>Padding:</label>
-                <input type="number" id="dualWordPadding" class="setting-input" step="1" value="2" min="0" max="20">
-                <span class="unit">px</span>
-              </div>
-
-              <div class="setting-row">
-                <label>Gap:</label>
-                <input type="number" id="dualWordGap" class="setting-input" step="0.1" value="0.1" min="0" max="1">
-                <span class="unit">em</span>
-              </div>
-
-              <div class="setting-row">
-                <label>Top Font Size:</label>
-                <input type="number" id="topWordFontSize" class="setting-input" step="0.1" value="1.36" min="0.3"
-                  max="1.5">
-                <span class="unit">em</span>
-              </div>
-
-              <div class="setting-row">
-                <label>Bottom Font Size:</label>
-                <input type="number" id="bottomWordFontSize" class="setting-input" step="0.1" value="0.4" min="0.3"
-                  max="1.5">
-                <span class="unit">em</span>
-              </div>
-
-              <div class="setting-row">
-                <label>Line Height:</label>
-                <input type="number" id="dualWordLineHeight" class="setting-input" step="0.1" value="1" min="0.8"
-                  max="2">
-              </div>
-
-              <div class="setting-row">
-                <label>Letter Spacing:</label>
-                <input type="number" id="dualWordLetterSpacing" class="setting-input" step="0.01" value="0" min="-0.1"
-                  max="0.2">
-                <span class="unit">em</span>
-              </div>
-
-              <div class="setting-row">
-                <label>Top Vertical Offset:</label>
-                <input type="number" id="topWordOffset" class="setting-input" step="1" value="-3" min="-10" max="10">
-                <span class="unit">px</span>
-              </div>
-
-              <div class="setting-row">
-                <label>Bottom Vertical Offset:</label>
-                <input type="number" id="bottomWordOffset" class="setting-input" step="1" value="12" min="-20" max="20">
-                <span class="unit">px</span>
-              </div>
-
-              <button id="resetDualWordSettings" class="btn reset-btn">Reset to Default</button>
             </div>
-          </div>
+            <div class="setting-group">
+              <label><input type="checkbox" id="showTranslatorSettings" checked> Show Translator</label>
+            </div>
+            <div class="setting-group">
+              <label><input type="checkbox" id="hideSurahAyat" checked> Show Surah:Ayat in Translation</label>
+            </div>
+            <div class="setting-group">
+              <label>Arabic Font Style</label>
+              <select id="arabicFontStyle" class="setting-input">
+                <option value="uthmani">Uthmani Script</option>
+                <option value="indo-pak">Indo Pak Script</option>
+              </select>
+            </div>
 
-          <!-- Notes Settings -->
-          <div class="settings-section">
-            <h3 class="settings-title collapsible collapsed" data-target="notes-settings">Notes Settings</h3>
-            <div id="notes-settings" style="display:none;">
-              <div class="setting-group">
-                <label>Notes Display</label>
-                <select id="notesDisplayMode" class="setting-input">
-                  <option value="superscript">Above Text (Superscript)</option>
-                  <option value="inline">Inline with Icons</option>
-                </select>
-              </div>
-              <div class="setting-group">
-                <label>Note Icon Size</label>
+            <!-- Dual Word Settings -->
+            <div class="settings-section">
+              <h3 class="settings-title collapsible collapsed" data-target="dual-word-settings">Parallel Word Settings
+              </h3>
+              <div id="dual-word-settings" class="dual-word-controls" style="display: none;">
                 <div class="setting-row">
-                  <input type="range" id="noteIconSize" class="setting-input" min="40" max="100" value="60" step="5">
-                  <span id="noteIconSizeValue">60%</span>
+                  <label>Direction:</label>
+                  <select id="dualWordDirection" class="setting-input">
+                    <option value="column">Vertical</option>
+                    <option value="row">Horizontal</option>
+                  </select>
+                </div>
+
+                <div class="setting-row">
+                  <label>Alignment:</label>
+                  <select id="dualWordAlignment" class="setting-input">
+                    <option value="center">Center</option>
+                    <option value="flex-start">Top/Left</option>
+                    <option value="flex-end">Bottom/Right</option>
+                  </select>
+                </div>
+
+                <div class="setting-row">
+                  <label>Margin:</label>
+                  <input type="number" id="dualWordMargin" class="setting-input" step="0.1" value="0.2" min="0" max="2">
+                  <span class="unit">em</span>
+                </div>
+
+                <div class="setting-row">
+                  <label>Padding:</label>
+                  <input type="number" id="dualWordPadding" class="setting-input" step="1" value="2" min="0" max="20">
+                  <span class="unit">px</span>
+                </div>
+
+                <div class="setting-row">
+                  <label>Gap:</label>
+                  <input type="number" id="dualWordGap" class="setting-input" step="0.1" value="0.1" min="0" max="1">
+                  <span class="unit">em</span>
+                </div>
+
+                <div class="setting-row">
+                  <label>Top Font Size:</label>
+                  <input type="number" id="topWordFontSize" class="setting-input" step="0.1" value="1.36" min="0.3"
+                    max="1.5">
+                  <span class="unit">em</span>
+                </div>
+
+                <div class="setting-row">
+                  <label>Bottom Font Size:</label>
+                  <input type="number" id="bottomWordFontSize" class="setting-input" step="0.1" value="0.4" min="0.3"
+                    max="1.5">
+                  <span class="unit">em</span>
+                </div>
+
+                <div class="setting-row">
+                  <label>Line Height:</label>
+                  <input type="number" id="dualWordLineHeight" class="setting-input" step="0.1" value="1" min="0.8"
+                    max="2">
+                </div>
+
+                <div class="setting-row">
+                  <label>Letter Spacing:</label>
+                  <input type="number" id="dualWordLetterSpacing" class="setting-input" step="0.01" value="0" min="-0.1"
+                    max="0.2">
+                  <span class="unit">em</span>
+                </div>
+
+                <div class="setting-row">
+                  <label>Top Vertical Offset:</label>
+                  <input type="number" id="topWordOffset" class="setting-input" step="1" value="-3" min="-10" max="10">
+                  <span class="unit">px</span>
+                </div>
+
+                <div class="setting-row">
+                  <label>Bottom Vertical Offset:</label>
+                  <input type="number" id="bottomWordOffset" class="setting-input" step="1" value="12" min="-20"
+                    max="20">
+                  <span class="unit">px</span>
+                </div>
+
+                <button id="resetDualWordSettings" class="btn reset-btn">Reset to Default</button>
+              </div>
+            </div>
+
+            <!-- Notes Settings -->
+            <div class="settings-section">
+              <h3 class="settings-title collapsible collapsed" data-target="notes-settings">Notes Settings</h3>
+              <div id="notes-settings" style="display:none;">
+                <div class="setting-group">
+                  <label>Notes Display</label>
+                  <select id="notesDisplayMode" class="setting-input">
+                    <option value="superscript">Above Text (Superscript)</option>
+                    <option value="inline">Inline with Icons</option>
+                  </select>
+                </div>
+                <div class="setting-group">
+                  <label>Note Icon Size</label>
+                  <div class="setting-row">
+                    <input type="range" id="noteIconSize" class="setting-input" min="40" max="100" value="60" step="5">
+                    <span id="noteIconSizeValue">60%</span>
+                  </div>
+                </div>
+                <div class="setting-group">
+                  <label>Note Icon Horizontal Spacing</label>
+                  <div class="setting-row">
+                    <input type="range" id="noteIconSpacing" class="setting-input" min="0" max="10" value="2"
+                      step="0.5">
+                    <span id="noteIconSpacingValue">2px</span>
+                  </div>
+                </div>
+                <div class="setting-group">
+                  <label>Note Icon Vertical Spacing</label>
+                  <div class="setting-row">
+                    <input type="range" id="noteIconVerticalSpacing" class="setting-input" min="-5" max="5" value="0"
+                      step="0.5">
+                    <span id="noteIconVerticalSpacingValue">0px</span>
+                  </div>
                 </div>
               </div>
-              <div class="setting-group">
-                <label>Note Icon Horizontal Spacing</label>
-                <div class="setting-row">
-                  <input type="range" id="noteIconSpacing" class="setting-input" min="0" max="10" value="2" step="0.5">
-                  <span id="noteIconSpacingValue">2px</span>
-                </div>
-              </div>
-              <div class="setting-group">
-                <label>Note Icon Vertical Spacing</label>
-                <div class="setting-row">
-                  <input type="range" id="noteIconVerticalSpacing" class="setting-input" min="-5" max="5" value="0"
-                    step="0.5">
-                  <span id="noteIconVerticalSpacingValue">0px</span>
-                </div>
-              </div>
             </div>
           </div>
-        </div>
         </div>
       </aside>
 
@@ -279,8 +287,8 @@
 
   <script src="main.js"></script>
   <!-- Cloudflare Web Analytics -->
-   <!-- <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ea4979c99eed4daebe8561f9d7354c69"}'></script> -->
-   <!-- End Cloudflare Web Analytics -->
+  <!-- <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ea4979c99eed4daebe8561f9d7354c69"}'></script> -->
+  <!-- End Cloudflare Web Analytics -->
 </body>
 
 </html>

@@ -766,6 +766,51 @@ document.getElementById("transMinus")?.addEventListener("click", () => {
    }
 });
 
+// Function to recalculate shortnote margins after font size change
+function recalculateShortnoteMargins() {
+   // Find all ruby elements and recalculate their margins
+   document.querySelectorAll('.short-note-ruby').forEach(ruby => {
+      const rtElement = ruby.querySelector('rt');
+      const rbElement = ruby.querySelector('rb');
+      
+      if (rtElement && rbElement) {
+         // Find the parent span containing this ruby
+         const charSpan = ruby.closest('span');
+         const nextSpan = charSpan?.nextElementSibling;
+         
+         if (nextSpan && nextSpan.tagName === 'SPAN') {
+            // Recalculate margin using the same logic as in applyAnnotationsToText
+            const fontSizeRatio = shortnoteSize / 14;
+            const baseCharWidth = shortnoteSize * (0.45 + (fontSizeRatio * 0.05));
+            const textLength = rtElement.textContent.length;
+            const rubyWidth = textLength * baseCharWidth;
+            
+            let compensationFactor;
+            if (shortnoteSize < 10) {
+               // Very small fonts need minimal compensation to prevent overlap
+               compensationFactor = 0.2 + (fontSizeRatio * 0.3); // Range: 0.2-0.5 for sizes 8-10px
+            } else if (shortnoteSize < 14) {
+               // Small fonts need gradual compensation
+               compensationFactor = 0.5 + ((fontSizeRatio - 0.714) * 0.6); // Range: 0.5-0.8 for sizes 10-14px
+            } else if (shortnoteSize > 14) {
+               // Larger fonts: more negative margin (away from 0)
+               compensationFactor = 0.8 + ((fontSizeRatio - 1) * 0.2); // Gradual increase from 0.8
+            } else {
+               compensationFactor = 0.8; // Baseline at 14px
+            }
+            
+            const calculatedMargin = -(rubyWidth * compensationFactor);
+            
+            if (calculatedMargin <= -1) {
+               nextSpan.style.marginLeft = calculatedMargin + 'px';
+            } else {
+               nextSpan.style.marginLeft = ''; // Reset margin if not needed
+            }
+         }
+      }
+   });
+}
+
 // Shortnote font size controls
 let shortnoteSize = parseInt(localStorage.getItem('shortnoteSize') || '14');
 document.getElementById("shortnotePlus")?.addEventListener("click", () => {
@@ -775,6 +820,9 @@ document.getElementById("shortnotePlus")?.addEventListener("click", () => {
       document.querySelectorAll('.short-note-ruby').forEach(el => el.style.fontSize = shortnoteSize + "px");
       const valEl = document.getElementById('shortnoteSizeValue');
       if (valEl) valEl.textContent = shortnoteSize;
+      
+      // Recalculate margins for the new font size
+      recalculateShortnoteMargins();
    }
 });
 document.getElementById("shortnoteMinus")?.addEventListener("click", () => {
@@ -784,6 +832,9 @@ document.getElementById("shortnoteMinus")?.addEventListener("click", () => {
       document.querySelectorAll('.short-note-ruby').forEach(el => el.style.fontSize = shortnoteSize + "px");
       const valEl = document.getElementById('shortnoteSizeValue');
       if (valEl) valEl.textContent = shortnoteSize;
+      
+      // Recalculate margins for the new font size
+      recalculateShortnoteMargins();
    }
 });
 
@@ -1844,21 +1895,41 @@ async function applyAnnotationsToText(text, annotations) {
                rubyElement.appendChild(rtElement);
                charSpan.appendChild(rubyElement);
                
-               // Calculate margin-left based on shortnote text visual width
+               // Calculate margin-left based on shortnote text visual width with font-size responsiveness
                const nextSpan = charSpan.nextElementSibling;
                if (nextSpan && nextSpan.tagName === 'SPAN') {
-                  // Aggressive calculation to eliminate whitespace from ruby annotations
-                  const baseCharWidth = shortnoteSize * 0.5; // Increased multiplier for better compensation
+                  // Dynamic calculation that adapts to font size changes
+                  const fontSizeRatio = shortnoteSize / 20; // Base ratio using 14px as reference
+                  
+                  // Adaptive base character width calculation
+                  // Smaller fonts: less per-character width, larger fonts: more per-character width
+                  const baseCharWidth = shortnoteSize * (0.45 + (fontSizeRatio * 0.05)); // Dynamic multiplier: 0.45-0.55
                   const textLength = note.text.length;
                   
                   // Calculate full visual width of ruby text
                   const rubyWidth = textLength * baseCharWidth;
                   
-                  // Apply more aggressive margin to close the gap
-                  // Use 80% of calculated width for better compensation
-                  const calculatedMargin = -(rubyWidth * 0.8);
+                  // Dynamic compensation factor based on font size
+                  // Smaller fonts: less negative margin (towards 0)
+                  // Larger fonts: more negative margin (away from 0)
+                  let compensationFactor;
+                  if (shortnoteSize < 10) {
+                     // Very small fonts need minimal compensation to prevent overlap
+                     compensationFactor = 0.2 + (fontSizeRatio * 0.3); // Range: 0.3-0.6 for sizes 8-10px
+                  } else if (shortnoteSize < 14) {
+                     // Small fonts need gradual compensation
+                     compensationFactor = 0.5 + ((fontSizeRatio - 0.714) * 0.6); // Range: 0.5-0.8 for sizes 10-14px
+                  } else if (shortnoteSize > 14) {
+                     // Larger fonts need more compensation (more negative margin)
+                     compensationFactor = 0.8 + ((fontSizeRatio - 1) * 0.2); // Gradual increase from 0.8
+                  } else {
+                     compensationFactor = 0.8; // Baseline at 14px
+                  }
                   
-                  // Apply margin if it would be at least -1px (more sensitive threshold)
+                  // Calculate final margin with dynamic compensation
+                  const calculatedMargin = -(rubyWidth * compensationFactor);
+                  
+                  // Apply margin if it would be at least -1px
                   if (calculatedMargin <= -1) {
                      nextSpan.style.marginLeft = calculatedMargin + 'px';
                   }

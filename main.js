@@ -2013,36 +2013,94 @@ async function openNoteDialog(title, content) {
    document.addEventListener('mouseup', stopDragging);
    document.addEventListener('touchend', stopDragging);
 
-   // Handle resize area interactions
+   // Custom resize functionality for the blue area
    if (modalContent) {
-      // Track resize area interactions
+      let isCustomResizing = false;
+      let resizeStartX, resizeStartY, startWidth, startHeight;
+      
+      // Handle custom resize from anywhere in the blue area
       modalContent.addEventListener('mousedown', function(e) {
          const rect = modalContent.getBoundingClientRect();
-         const isInResizeArea = e.clientX > rect.right - 60 && e.clientY > rect.bottom - 60;
+         const resizeAreaSize = window.innerWidth <= 768 ? 50 : 30; // Match CSS sizes
+         const isInResizeArea = e.clientX > rect.right - resizeAreaSize && e.clientY > rect.bottom - resizeAreaSize;
+         
          if (isInResizeArea) {
             isResizing = true;
-            e.stopPropagation(); // Prevent drag
+            isCustomResizing = true;
+            resizeStartX = e.clientX;
+            resizeStartY = e.clientY;
+            startWidth = rect.width;
+            startHeight = rect.height;
+            
+            // Disable browser's default resize
+            modalContent.style.resize = 'none';
+            document.body.style.userSelect = 'none';
+            e.stopPropagation();
+            e.preventDefault();
          }
       });
 
       modalContent.addEventListener('touchstart', function(e) {
          const rect = modalContent.getBoundingClientRect();
          const touch = e.touches[0];
-         const isInResizeArea = touch.clientX > rect.right - 60 && touch.clientY > rect.bottom - 60;
+         const resizeAreaSize = window.innerWidth <= 768 ? 50 : 30;
+         const isInResizeArea = touch.clientX > rect.right - resizeAreaSize && touch.clientY > rect.bottom - resizeAreaSize;
+         
          if (isInResizeArea) {
             isResizing = true;
-            e.stopPropagation(); // Prevent drag
+            isCustomResizing = true;
+            resizeStartX = touch.clientX;
+            resizeStartY = touch.clientY;
+            startWidth = rect.width;
+            startHeight = rect.height;
+            
+            modalContent.style.resize = 'none';
+            document.body.style.userSelect = 'none';
+            e.stopPropagation();
+            e.preventDefault();
          }
+      }, { passive: false });
+
+      // Handle resize movement (mouse)
+      document.addEventListener('mousemove', function(e) {
+         if (!isCustomResizing) return;
+         
+         const newWidth = Math.max(280, startWidth + (e.clientX - resizeStartX));
+         const newHeight = Math.max(120, startHeight + (e.clientY - resizeStartY));
+         
+         modalContent.style.width = newWidth + 'px';
+         modalContent.style.height = newHeight + 'px';
+         
+         e.preventDefault();
       });
 
-      // Reset resize state
-      document.addEventListener('mouseup', () => {
-         setTimeout(() => { isResizing = false; }, 100);
-      });
+      // Handle resize movement (touch)
+      document.addEventListener('touchmove', function(e) {
+         if (!isCustomResizing) return;
+         
+         const touch = e.touches[0];
+         const newWidth = Math.max(280, startWidth + (touch.clientX - resizeStartX));
+         const newHeight = Math.max(120, startHeight + (touch.clientY - resizeStartY));
+         
+         modalContent.style.width = newWidth + 'px';
+         modalContent.style.height = newHeight + 'px';
+         
+         e.preventDefault();
+      }, { passive: false });
 
-      document.addEventListener('touchend', () => {
+      // End custom resize
+      function stopCustomResize() {
+         if (isCustomResizing) {
+            isCustomResizing = false;
+            // Re-enable browser resize for fallback
+            modalContent.style.resize = 'both';
+            document.body.style.userSelect = '';
+         }
          setTimeout(() => { isResizing = false; }, 100);
-      });
+      }
+
+      document.addEventListener('mouseup', stopCustomResize);
+      document.addEventListener('touchend', stopCustomResize);
    }
 }
 

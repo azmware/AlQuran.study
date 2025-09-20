@@ -90,138 +90,64 @@ async function fetchBookmarksFromSheet() {
          obj[h] = cell && cell.v !== null && cell.v !== undefined ? cell.v : '';
       });
       return { 
-         BMID: obj["BMID"],
          SurahNumber: obj["SurahNumber"], 
-         AyatNumber: obj["AyatNumber"],
-         BMName: obj["BMName"],
-         ParentBMID: obj["ParentBMID"]
+         AyatNumber: obj["AyatNumber"]
       };
-   });
+   }).filter(bookmark => bookmark.SurahNumber && bookmark.AyatNumber); // Only include bookmarks with valid surah and ayat
 }
 
-// Render bookmarks in left panel with hierarchical structure
+// Render bookmarks as a simple flat list
 function renderBookmarks(bookmarks) {
    const preview = document.getElementById('bookmarkPreview');
    preview.innerHTML = '';
    
-   // Build hierarchical structure
-   const bookmarkMap = new Map();
-   const rootBookmarks = [];
-   
-   // First pass: create map of all bookmarks
-   bookmarks.forEach(b => {
-      bookmarkMap.set(b.BMID, { ...b, children: [] });
-   });
-   
-   // Second pass: build parent-child relationships
-   bookmarks.forEach(b => {
-      if (b.ParentBMID && bookmarkMap.has(b.ParentBMID)) {
-         // This is a child bookmark
-         bookmarkMap.get(b.ParentBMID).children.push(bookmarkMap.get(b.BMID));
-      } else {
-         // This is a root bookmark (no parent or parent not found)
-         rootBookmarks.push(bookmarkMap.get(b.BMID));
-      }
-   });
+   if (!bookmarks || bookmarks.length === 0) {
+      preview.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">No bookmarks found</p>';
+      return;
+   }
    
    const list = document.createElement('div');
    list.style.display = 'flex';
    list.style.flexDirection = 'column';
-   list.style.gap = '4px';
+   list.style.gap = '8px';
    
-   // Render hierarchical bookmarks
-   function renderBookmarkItem(bookmark, level = 0) {
-      const item = document.createElement('div');
-      item.className = 'bookmark-item';
-      item.style.marginLeft = (level * 20) + 'px';
-      
-      // Create bookmark link/header
-      const header = document.createElement('div');
-      header.style.display = 'flex';
-      header.style.alignItems = 'center';
-      header.style.gap = '8px';
-      
-      // Collapse/expand indicator for items with children
-      if (bookmark.children.length > 0) {
-         const toggle = document.createElement('span');
-         toggle.className = 'bookmark-toggle';
-         toggle.textContent = '▼';
-         toggle.style.cursor = 'pointer';
-         toggle.style.fontSize = '12px';
-         toggle.style.transition = 'transform 0.2s';
-         toggle.style.color = 'var(--text-secondary)';
+   // Render each bookmark as a simple clickable item
+   bookmarks.forEach((bookmark, i) => {
+      if (bookmark.SurahNumber && bookmark.AyatNumber && i === 0) {
+         const item = document.createElement('div');
+         item.className = 'bookmark-item';
          
-         toggle.onclick = () => {
-            const isCollapsed = childrenContainer.style.display === 'none';
-            childrenContainer.style.display = isCollapsed ? 'block' : 'none';
-            toggle.style.transform = isCollapsed ? 'rotate(0deg)' : 'rotate(-90deg)';
-         };
+         const link = document.createElement('a');
+         link.className = 'bookmark-list-link';
+         link.href = '#';
+         link.style.display = 'block';
+         link.style.padding = '8px 12px';
+         link.style.textDecoration = 'none';
+         link.style.color = 'var(--accent, #007bff)';
+         link.style.backgroundColor = 'var(--card-bg)';
+         link.style.border = '1px solid var(--border)';
+         link.style.borderRadius = '4px';
+         link.style.cursor = 'pointer';
+         link.style.transition = 'background-color 0.2s';
          
-         header.appendChild(toggle);
-      } else {
-         // Add spacing for items without children
-         const spacer = document.createElement('span');
-         spacer.style.width = '20px';
-         header.appendChild(spacer);
-      }
-      
-      // Bookmark link
-      const link = document.createElement('a');
-      link.className = 'bookmark-list-link';
-      link.href = '#';
-      link.style.textDecoration = 'none';
-      link.style.color = 'var(--accent, #007bff)';
-      link.style.fontWeight = level === 0 ? '600' : '500';
-      link.style.fontSize = level === 0 ? '1em' : '0.9em';
-      link.style.flex = '1';
-      
-      // Display bookmark name and surah:ayat info
-      if (bookmark.BMName) {
-         link.innerHTML = `<strong>${bookmark.BMName}</strong>`;
-         if (bookmark.SurahNumber && bookmark.AyatNumber) {
-            link.innerHTML += `<br><small style="color: var(--text-secondary);">${bookmark.SurahNumber}:${bookmark.AyatNumber}</small>`;
-         }
-      } else if (bookmark.SurahNumber && bookmark.AyatNumber) {
          link.textContent = `${bookmark.SurahNumber}:${bookmark.AyatNumber}`;
-      } else {
-         link.textContent = 'Unnamed Bookmark';
-      }
-      
-      // Only add click handler if there's surah/ayat info
-      if (bookmark.SurahNumber && bookmark.AyatNumber) {
+         
          link.onclick = (e) => {
             e.preventDefault();
             gotoSurahAyah(bookmark.SurahNumber, bookmark.AyatNumber);
          };
-         link.style.cursor = 'pointer';
-      } else {
-         link.style.cursor = 'default';
-         link.style.color = 'var(--text-secondary)';
+         
+         // Add hover effect
+         link.onmouseenter = () => {
+            link.style.backgroundColor = 'var(--accent-light)';
+         };
+         link.onmouseleave = () => {
+            link.style.backgroundColor = 'var(--card-bg)';
+         };
+         
+         item.appendChild(link);
+         list.appendChild(item);
       }
-      
-      header.appendChild(link);
-      item.appendChild(header);
-      
-      // Children container
-      const childrenContainer = document.createElement('div');
-      childrenContainer.className = 'bookmark-children';
-      childrenContainer.style.display = 'block';
-      
-      // Render children
-      bookmark.children.forEach(child => {
-         childrenContainer.appendChild(renderBookmarkItem(child, level + 1));
-      });
-      
-      if (bookmark.children.length > 0) {
-         item.appendChild(childrenContainer);
-      }
-      
-      return item;
-   }
-   
-   // Render all root bookmarks
-   rootBookmarks.forEach(bookmark => {
-      list.appendChild(renderBookmarkItem(bookmark));
    });
    
    preview.appendChild(list);
@@ -768,7 +694,7 @@ document.getElementById("transMinus")?.addEventListener("click", () => {
 
 // Function to recalculate shortnote margins after font size change
 function recalculateShortnoteMargins() {
-   // Find all ruby elements and recalculate their margins
+   // Find all ruby elements and recalculate their margins (legacy ruby implementation)
    document.querySelectorAll('.short-note-ruby').forEach(ruby => {
       const rtElement = ruby.querySelector('rt');
       const rbElement = ruby.querySelector('rb');
@@ -812,12 +738,12 @@ function recalculateShortnoteMargins() {
 }
 
 // Shortnote font size controls
-let shortnoteSize = parseInt(localStorage.getItem('shortnoteSize') || '14');
+let shortnoteSize = parseInt(localStorage.getItem('shortnoteSize') || '10');
 document.getElementById("shortnotePlus")?.addEventListener("click", () => {
    if (shortnoteSize < 28) {
       shortnoteSize += 1;
       localStorage.setItem('shortnoteSize', shortnoteSize);
-      document.querySelectorAll('.short-note-ruby').forEach(el => el.style.fontSize = shortnoteSize + "px");
+      document.querySelectorAll('.short-note-superscript').forEach(el => el.style.fontSize = shortnoteSize + "px");
       const valEl = document.getElementById('shortnoteSizeValue');
       if (valEl) valEl.textContent = shortnoteSize;
       
@@ -829,7 +755,7 @@ document.getElementById("shortnoteMinus")?.addEventListener("click", () => {
    if (shortnoteSize > 8) {
       shortnoteSize -= 1;
       localStorage.setItem('shortnoteSize', shortnoteSize);
-      document.querySelectorAll('.short-note-ruby').forEach(el => el.style.fontSize = shortnoteSize + "px");
+      document.querySelectorAll('.short-note-superscript').forEach(el => el.style.fontSize = shortnoteSize + "px");
       const valEl = document.getElementById('shortnoteSizeValue');
       if (valEl) valEl.textContent = shortnoteSize;
       
@@ -894,7 +820,7 @@ document.getElementById("notesDisplayMode")?.addEventListener("change", function
 function updateNoteDisplayMode() {
    const notesDisplayMode = localStorage.getItem('notesDisplayMode') || 'superscript';
    const noteIconSize = localStorage.getItem('noteIconSize') || '60';
-   const noteIconSpacing = localStorage.getItem('noteIconSpacing') || '2';
+   const noteIconSpacing = localStorage.getItem('noteIconSpacing') || '-3';
    const noteIconVerticalSpacing = localStorage.getItem('noteIconVerticalSpacing') || '0';
 
    if (notesDisplayMode === 'superscript') {
@@ -989,7 +915,7 @@ document.getElementById("noteIconVerticalSpacing")?.addEventListener("input", fu
 // Function to update note icons live without page reload
 function updateNoteIconsLive() {
    const noteIconSize = localStorage.getItem('noteIconSize') || '60';
-   const noteIconSpacing = localStorage.getItem('noteIconSpacing') || '2';
+   const noteIconSpacing = localStorage.getItem('noteIconSpacing') || '-3';
    const noteIconVerticalSpacing = localStorage.getItem('noteIconVerticalSpacing') || '0';
 
    // Update all note icons (inline mode)
@@ -1053,7 +979,7 @@ function initSettings() {
    }
 
    // Load saved note icon spacing preference
-   const savedNoteIconSpacing = localStorage.getItem('noteIconSpacing') || '2';
+   const savedNoteIconSpacing = localStorage.getItem('noteIconSpacing') || '-3';
    const noteIconSpacingSlider = document.getElementById("noteIconSpacing");
    const noteIconSpacingValue = document.getElementById("noteIconSpacingValue");
    if (noteIconSpacingSlider && noteIconSpacingValue) {
@@ -1640,9 +1566,6 @@ function renderTags(tags) {
 
                         row.appendChild(arabicCell);
                         row.appendChild(transCell);
-                        row.addEventListener('click', () => {
-                           loadSurah(surahNum, ayahNum);
-                        });
                         content.appendChild(row);
                      }
                   }
@@ -1910,65 +1833,35 @@ async function applyAnnotationsToText(text, annotations) {
       if (charSpan) {
          if (note.type === "ShortNote" || notesDisplayMode === "superscript") {
             if (note.type === "ShortNote") {
-               // For ShortNote: Use ruby annotation approach for natural text flow
-               const rubyElement = document.createElement("ruby");
-               const rtElement = document.createElement("rt");
-               // Move the character to ruby base
-               const originalChar = charSpan.textContent;
-               charSpan.textContent = "";
-               const rbElement = document.createElement("rb");
-               rbElement.textContent = originalChar;
-               rtElement.textContent = note.text;
-               rtElement.className = "short-note-ruby";
-               rtElement.style.fontSize = shortnoteSize + "px";
-               rtElement.style.color = "var(--text-secondary)";
-               rtElement.style.fontStyle = "italic";
-               rubyElement.appendChild(rbElement);
-               rubyElement.appendChild(rtElement);
-               charSpan.appendChild(rubyElement);
-               
-               // Calculate margin-left based on shortnote text visual width with font-size responsiveness
-               const nextSpan = charSpan.nextElementSibling;
-               if (nextSpan && nextSpan.tagName === 'SPAN') {
-                  // Dynamic calculation that adapts to font size changes
-                  const fontSizeRatio = shortnoteSize / 20; // Base ratio using 14px as reference
-                  
-                  // Adaptive base character width calculation
-                  // Smaller fonts: less per-character width, larger fonts: more per-character width
-                  const baseCharWidth = shortnoteSize * (0.45 + (fontSizeRatio * 0.05)); // Dynamic multiplier: 0.45-0.55
-                  const textLength = note.text.length;
-                  
-                  // Calculate full visual width of ruby text
-                  const rubyWidth = textLength * baseCharWidth;
-                  
-                  // Dynamic compensation factor based on font size
-                  // Smaller fonts: less negative margin (towards 0)
-                  // Larger fonts: more negative margin (away from 0)
-                  let compensationFactor;
-                  if (shortnoteSize < 10) {
-                     // Very small fonts need minimal compensation to prevent overlap
-                     compensationFactor = 0.2 + (fontSizeRatio * 0.3); // Range: 0.3-0.6 for sizes 8-10px
-                  } else if (shortnoteSize < 14) {
-                     // Small fonts need gradual compensation
-                     compensationFactor = 0.5 + ((fontSizeRatio - 0.714) * 0.6); // Range: 0.5-0.8 for sizes 10-14px
-                  } else if (shortnoteSize > 14) {
-                     // Larger fonts need more compensation (more negative margin)
-                     compensationFactor = 0.8 + ((fontSizeRatio - 1) * 0.2); // Gradual increase from 0.8
-                  } else {
-                     compensationFactor = 0.8; // Baseline at 14px
-                  }
-                  
-                  // Calculate final margin with dynamic compensation
-                  const calculatedMargin = -(rubyWidth * compensationFactor);
-                  
-                  // Apply margin if it would be at least -1px
-                  if (calculatedMargin <= -1) {
-                     nextSpan.style.marginLeft = calculatedMargin + 'px';
-                  }
-               }
+               // For ShortNote: Use absolute positioning like note icons
+               const noteIconSpacing = parseFloat(localStorage.getItem('noteIconSpacing') || -3);
+               const noteIconVerticalSpacing = parseFloat(localStorage.getItem('noteIconVerticalSpacing') || 0);
+               const noteSpan = document.createElement("span");
+               noteSpan.className = "short-note-superscript";
+               noteSpan.textContent = note.text;
+               noteSpan.style.position = "absolute";
+               noteSpan.style.top = "-1.2em";
+               noteSpan.style.left = "0";
+               noteSpan.style.width = "max-content";
+               noteSpan.style.pointerEvents = "auto";
+               noteSpan.style.background = "transparent";
+               noteSpan.style.fontSize = shortnoteSize + "px";
+               noteSpan.style.color = "black";
+               noteSpan.style.fontStyle = "normal";
+               noteSpan.style.zIndex = "2";
+               noteSpan.style.cursor = "pointer";
+               noteSpan.style.marginLeft = noteIconSpacing + "px";
+               noteSpan.style.marginRight = noteIconSpacing + "px";
+               noteSpan.style.marginTop = noteIconVerticalSpacing + "px";
+               noteSpan.style.marginBottom = noteIconVerticalSpacing + "px";
+               noteSpan.setAttribute("data-notetext", note.text);
+               noteSpan.setAttribute("data-notetype", note.noteTitle || "ShortNote");
+
+               charSpan.style.position = "relative";
+               charSpan.appendChild(noteSpan);
             } else {
                // For regular notes in superscript mode: keep original behavior
-               const noteIconSpacing = parseFloat(localStorage.getItem('noteIconSpacing') || 2);
+               const noteIconSpacing = parseFloat(localStorage.getItem('noteIconSpacing') || -3);
                const noteIconVerticalSpacing = parseFloat(localStorage.getItem('noteIconVerticalSpacing') || 0);
                const noteSpan = document.createElement("span");
                noteSpan.className = "note-superscript";
@@ -1994,7 +1887,7 @@ async function applyAnnotationsToText(text, annotations) {
             }
          } else {
             // Inline mode - original behavior for Notes
-            const noteIconSpacing = parseFloat(localStorage.getItem('noteIconSpacing') || 2);
+            const noteIconSpacing = parseFloat(localStorage.getItem('noteIconSpacing') || -3);
             const noteIconVerticalSpacing = parseFloat(localStorage.getItem('noteIconVerticalSpacing') || 0);
             const noteSpan = document.createElement("span");
             noteSpan.className = "note-icon";
@@ -2019,7 +1912,6 @@ async function applyAnnotationsToText(text, annotations) {
 
 // Dialog logic for notes - Updated to use the modal from HTML and support HTML content
 async function openNoteDialog(title, content) {
-   console.log('Opening note dialog:', title);
    const modal = document.getElementById('noteModal');
    const modalTitle = document.getElementById('noteModalTitle');
    const modalBody = document.getElementById('noteModalBody');
@@ -2027,96 +1919,58 @@ async function openNoteDialog(title, content) {
 
    if (!modal || !modalTitle || !modalBody || !modalClose) return;
 
-   modalTitle.textContent = title || 'NoteType';
+   modalTitle.textContent = title || 'Note';
    modalBody.innerHTML = content; // Allow HTML content
    modal.style.display = 'block';
 
    // Add handlers for surah/ayat and annotation links
    await addSurahAyatLinkHandlers(modalBody);
 
-   // Close modal when clicking the X - handle both click and touch for mobile compatibility
-   const closeModal = () => modal.style.display = 'none';
-   
-   // Handle desktop clicks
-   modalClose.onclick = closeModal;
-   
-   // Handle mobile touches - use both touchstart and touchend for better compatibility
-   let touchStarted = false;
-   modalClose.addEventListener('touchstart', (e) => {
-      touchStarted = true;
-      e.preventDefault();
-      e.stopPropagation();
-   });
-   
-   modalClose.addEventListener('touchend', (e) => {
-      if (touchStarted) {
-         touchStarted = false;
-         e.preventDefault();
-         e.stopPropagation();
-         closeModal();
-      }
-   });
+   // Close modal when clicking the X
+   modalClose.onclick = () => modal.style.display = 'none';
 
-   // Track if resizing is happening
-   let isResizing = false;
-   // Listen for mousedown on the modal's resize handle (bottom-right corner)
-   modalContent.addEventListener('mousedown', function(e) {
-      // Only start resizing if near the bottom-right corner
-      const rect = modalContent.getBoundingClientRect();
-      if (e.clientX > rect.right - 24 && e.clientY > rect.bottom - 24) {
-         isResizing = true;
-      }
-   });
-   window.addEventListener('mouseup', function() {
-      isResizing = false;
-   });
-   // Close modal when clicking outside - handle both click and touch events
-   const closeOnOutsideClick = (e) => {
-      if (isResizing) return; // Don't close if resizing
+   // Close modal when clicking outside
+   modal.onclick = (e) => {
       if (e.target === modal) {
          modal.style.display = 'none';
       }
    };
-   modal.onclick = closeOnOutsideClick;
-   modal.ontouchend = closeOnOutsideClick;
 
-   // Make modal draggable (desktop and mobile)
+   // Make modal draggable
    let isDragging = false;
    let startX, startY, startLeft, startTop;
-   const modalContent = document.getElementById('noteModalContent');
+
    const modalHeader = document.getElementById('noteModalHeader');
-   function dragStart(e) {
-      isDragging = true;
-      startX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-      startY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-      const rect = modalContent.getBoundingClientRect();
-      startLeft = rect.left;
-      startTop = rect.top;
-      document.body.style.userSelect = 'none';
-      e.preventDefault();
+   if (modalHeader) {
+      modalHeader.onmousedown = function (e) {
+         isDragging = true;
+         const modalContent = document.getElementById('noteModalContent');
+         startX = e.clientX;
+         startY = e.clientY;
+         const rect = modalContent.getBoundingClientRect();
+         startLeft = rect.left;
+         startTop = rect.top;
+         document.body.style.userSelect = 'none';
+         e.preventDefault();
+      };
    }
-   function dragMove(e) {
+
+   document.onmousemove = function (e) {
       if (!isDragging) return;
-      const x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-      const y = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-      const newLeft = startLeft + x - startX;
-      const newTop = startTop + y - startY;
-      modalContent.style.left = newLeft + 'px';
-      modalContent.style.top = newTop + 'px';
-      modalContent.style.transform = 'none';
-   }
-   function dragEnd() {
+      const modalContent = document.getElementById('noteModalContent');
+      if (modalContent) {
+         const newLeft = startLeft + e.clientX - startX;
+         const newTop = startTop + e.clientY - startY;
+         modalContent.style.left = newLeft + 'px';
+         modalContent.style.top = newTop + 'px';
+         modalContent.style.transform = 'none';
+      }
+   };
+
+   document.onmouseup = function () {
       isDragging = false;
       document.body.style.userSelect = '';
-   }
-   if (modalHeader) {
-      modalHeader.addEventListener('mousedown', dragStart);
-      modalHeader.addEventListener('touchstart', dragStart);
-   }
-   window.addEventListener('mousemove', dragMove);
-   window.addEventListener('touchmove', dragMove);
-   window.addEventListener('mouseup', dragEnd);
-   window.addEventListener('touchend', dragEnd);
+   };
 }
 
 // Helper function to load and display reference content

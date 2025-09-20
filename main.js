@@ -1075,9 +1075,10 @@ let userHasCustomizedSettings = false;
 
 function initDualWordControls() {
    const controls = [
-      'dualWordDirection', 'dualWordAlignment', 'dualWordMargin', 'dualWordPadding',
-      'dualWordGap', 'topWordFontSize', 'bottomWordFontSize', 'dualWordLineHeight',
-      'dualWordLetterSpacing', 'topWordOffset', 'bottomWordOffset'
+      // 'dualWordDirection', 'dualWordAlignment', 'dualWordMargin', 'dualWordPadding',
+      // 'dualWordGap', 'topWordFontSize', 'bottomWordFontSize', 'dualWordLineHeight',
+      // 'dualWordLetterSpacing', 'topWordOffset', 'bottomWordOffset'
+      'topWordFontSize', 'bottomWordFontSize', 'topWordOffset', 'bottomWordOffset'
    ];
 
    controls.forEach(id => {
@@ -1118,15 +1119,15 @@ function initDualWordControls() {
             // Update form controls
             Object.keys(newDefaults).forEach(key => {
                const elementMap = {
-                  direction: 'dualWordDirection',
-                  alignment: 'dualWordAlignment',
-                  margin: 'dualWordMargin',
-                  padding: 'dualWordPadding',
-                  gap: 'dualWordGap',
+                  // direction: 'dualWordDirection',
+                  // alignment: 'dualWordAlignment',
+                  // margin: 'dualWordMargin',
+                  // padding: 'dualWordPadding',
+                  // gap: 'dualWordGap',
                   topFontSize: 'topWordFontSize',
                   bottomFontSize: 'bottomWordFontSize',
-                  lineHeight: 'dualWordLineHeight',
-                  letterSpacing: 'dualWordLetterSpacing',
+                  // lineHeight: 'dualWordLineHeight',
+                  // letterSpacing: 'dualWordLetterSpacing',
                   topOffset: 'topWordOffset',
                   bottomOffset: 'bottomWordOffset'
                };
@@ -1153,17 +1154,26 @@ function initDualWordControls() {
 function applyDualWordSettings() {
    const defaults = getDefaultDualWordSettings();
 
-   const direction = document.getElementById('dualWordDirection')?.value || defaults.direction;
-   const alignment = document.getElementById('dualWordAlignment')?.value || defaults.alignment;
-   const margin = parseFloat(document.getElementById('dualWordMargin')?.value) || defaults.margin;
-   const padding = parseInt(document.getElementById('dualWordPadding')?.value) || defaults.padding;
-   const gap = parseFloat(document.getElementById('dualWordGap')?.value) || defaults.gap;
+   // const direction = document.getElementById('dualWordDirection')?.value || defaults.direction;
+   // const alignment = document.getElementById('dualWordAlignment')?.value || defaults.alignment;
+   // const margin = parseFloat(document.getElementById('dualWordMargin')?.value) || defaults.margin;
+   // const padding = parseInt(document.getElementById('dualWordPadding')?.value) || defaults.padding;
+   // const gap = parseFloat(document.getElementById('dualWordGap')?.value) || defaults.gap;
    const topFontSize = parseFloat(document.getElementById('topWordFontSize')?.value) || defaults.topFontSize;
    const bottomFontSize = parseFloat(document.getElementById('bottomWordFontSize')?.value) || defaults.bottomFontSize;
-   const lineHeight = parseFloat(document.getElementById('dualWordLineHeight')?.value) || defaults.lineHeight;
-   const letterSpacing = parseFloat(document.getElementById('dualWordLetterSpacing')?.value) || defaults.letterSpacing;
+   // const lineHeight = parseFloat(document.getElementById('dualWordLineHeight')?.value) || defaults.lineHeight;
+   // const letterSpacing = parseFloat(document.getElementById('dualWordLetterSpacing')?.value) || defaults.letterSpacing;
    const topOffset = parseInt(document.getElementById('topWordOffset')?.value) || defaults.topOffset;
    const bottomOffset = parseInt(document.getElementById('bottomWordOffset')?.value) || defaults.bottomOffset;
+   
+   // Use default values for commented out settings
+   const direction = defaults.direction;
+   const alignment = defaults.alignment;
+   const margin = defaults.margin;
+   const padding = defaults.padding;
+   const gap = defaults.gap;
+   const lineHeight = defaults.lineHeight;
+   const letterSpacing = defaults.letterSpacing;
 
    // Update settings object
    dualWordSettings = {
@@ -1202,15 +1212,15 @@ function resetDualWordSettings() {
    const defaults = getDefaultDualWordSettings();
 
    // Update form controls
-   document.getElementById('dualWordDirection').value = defaults.direction;
-   document.getElementById('dualWordAlignment').value = defaults.alignment;
-   document.getElementById('dualWordMargin').value = defaults.margin;
-   document.getElementById('dualWordPadding').value = defaults.padding;
-   document.getElementById('dualWordGap').value = defaults.gap;
+   // document.getElementById('dualWordDirection').value = defaults.direction;
+   // document.getElementById('dualWordAlignment').value = defaults.alignment;
+   // document.getElementById('dualWordMargin').value = defaults.margin;
+   // document.getElementById('dualWordPadding').value = defaults.padding;
+   // document.getElementById('dualWordGap').value = defaults.gap;
    document.getElementById('topWordFontSize').value = defaults.topFontSize;
    document.getElementById('bottomWordFontSize').value = defaults.bottomFontSize;
-   document.getElementById('dualWordLineHeight').value = defaults.lineHeight;
-   document.getElementById('dualWordLetterSpacing').value = defaults.letterSpacing;
+   // document.getElementById('dualWordLineHeight').value = defaults.lineHeight;
+   // document.getElementById('dualWordLetterSpacing').value = defaults.letterSpacing;
    document.getElementById('topWordOffset').value = defaults.topOffset;
    document.getElementById('bottomWordOffset').value = defaults.bottomOffset;
 
@@ -1256,15 +1266,15 @@ function loadDualWordSettings() {
       }
 
       // Update form controls with loaded or default values
-      document.getElementById('dualWordDirection').value = dualWordSettings.direction;
-      document.getElementById('dualWordAlignment').value = dualWordSettings.alignment;
-      document.getElementById('dualWordMargin').value = dualWordSettings.margin;
-      document.getElementById('dualWordPadding').value = dualWordSettings.padding;
-      document.getElementById('dualWordGap').value = dualWordSettings.gap;
+      // document.getElementById('dualWordDirection').value = dualWordSettings.direction;
+      // document.getElementById('dualWordAlignment').value = dualWordSettings.alignment;
+      // document.getElementById('dualWordMargin').value = dualWordSettings.margin;
+      // document.getElementById('dualWordPadding').value = dualWordSettings.padding;
+      // document.getElementById('dualWordGap').value = dualWordSettings.gap;
       document.getElementById('topWordFontSize').value = dualWordSettings.topFontSize;
       document.getElementById('bottomWordFontSize').value = dualWordSettings.bottomFontSize;
-      document.getElementById('dualWordLineHeight').value = dualWordSettings.lineHeight;
-      document.getElementById('dualWordLetterSpacing').value = dualWordSettings.letterSpacing;
+      // document.getElementById('dualWordLineHeight').value = dualWordSettings.lineHeight;
+      // document.getElementById('dualWordLetterSpacing').value = dualWordSettings.letterSpacing;
       document.getElementById('topWordOffset').value = dualWordSettings.topOffset;
       document.getElementById('bottomWordOffset').value = dualWordSettings.bottomOffset;
 
@@ -1275,15 +1285,15 @@ function loadDualWordSettings() {
       userHasCustomizedSettings = false;
 
       // Update form controls with defaults
-      document.getElementById('dualWordDirection').value = defaults.direction;
-      document.getElementById('dualWordAlignment').value = defaults.alignment;
-      document.getElementById('dualWordMargin').value = defaults.margin;
-      document.getElementById('dualWordPadding').value = defaults.padding;
-      document.getElementById('dualWordGap').value = defaults.gap;
+      // document.getElementById('dualWordDirection').value = defaults.direction;
+      // document.getElementById('dualWordAlignment').value = defaults.alignment;
+      // document.getElementById('dualWordMargin').value = defaults.margin;
+      // document.getElementById('dualWordPadding').value = defaults.padding;
+      // document.getElementById('dualWordGap').value = defaults.gap;
       document.getElementById('topWordFontSize').value = defaults.topFontSize;
       document.getElementById('bottomWordFontSize').value = defaults.bottomFontSize;
-      document.getElementById('dualWordLineHeight').value = defaults.lineHeight;
-      document.getElementById('dualWordLetterSpacing').value = defaults.letterSpacing;
+      // document.getElementById('dualWordLineHeight').value = defaults.lineHeight;
+      // document.getElementById('dualWordLetterSpacing').value = defaults.letterSpacing;
       document.getElementById('topWordOffset').value = defaults.topOffset;
       document.getElementById('bottomWordOffset').value = defaults.bottomOffset;
    }
@@ -1929,9 +1939,54 @@ async function openNoteDialog(title, content) {
    // Close modal when clicking the X
    modalClose.onclick = () => modal.style.display = 'none';
 
-   // Close modal when clicking outside
+   // Track resize state to prevent accidental closing
+   let isResizing = false;
+   let resizeTimeout = null;
+   const modalContent = document.getElementById('noteModalContent');
+   
+   // Monitor for resize events
+   if (modalContent) {
+      const resizeObserver = new ResizeObserver(() => {
+         isResizing = true;
+         clearTimeout(resizeTimeout);
+         // Reset resize state after a short delay
+         resizeTimeout = setTimeout(() => {
+            isResizing = false;
+         }, 300);
+      });
+      resizeObserver.observe(modalContent);
+      
+      // Also track mouse events on resize handle area
+      modalContent.addEventListener('mousedown', (e) => {
+         const rect = modalContent.getBoundingClientRect();
+         const isInResizeArea = e.clientX > rect.right - 60 && e.clientY > rect.bottom - 60;
+         if (isInResizeArea) {
+            isResizing = true;
+            clearTimeout(resizeTimeout);
+         }
+      });
+      
+      // Reset resize state on mouse up
+      document.addEventListener('mouseup', () => {
+         if (isResizing) {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+               isResizing = false;
+            }, 200);
+         }
+      });
+      
+      // Clean up observer when modal closes
+      const originalCloseHandler = modalClose.onclick;
+      modalClose.onclick = () => {
+         resizeObserver.disconnect();
+         modal.style.display = 'none';
+      };
+   }
+
+   // Close modal when clicking outside (but not during resize)
    modal.onclick = (e) => {
-      if (e.target === modal) {
+      if (e.target === modal && !isResizing) {
          modal.style.display = 'none';
       }
    };

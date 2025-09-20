@@ -1174,7 +1174,7 @@ mark {
 
 /* Enhanced resize handle for better mobile experience */
 .note-modal-content::after {
-  content: '↘';
+  content: '⤡';
   position: absolute;
   bottom: 0;
   right: 0;

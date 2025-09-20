@@ -1931,13 +1931,43 @@ async function openNoteDialog(title, content) {
 
    modalTitle.textContent = title || 'Note';
    modalBody.innerHTML = content; // Allow HTML content
+   
+   // Reset modal size and position for new content
+   const modalContentEl = document.getElementById('noteModalContent');
+   if (modalContentEl) {
+      // Reset to default size and position
+      modalContentEl.style.width = '';
+      modalContentEl.style.height = '';
+      modalContentEl.style.left = '';
+      modalContentEl.style.top = '';
+      modalContentEl.style.transform = 'translate(-50%, -50%)';
+      modalContentEl.style.position = 'absolute';
+      // Re-enable default resize
+      modalContentEl.style.resize = 'both';
+   }
+   
    modal.style.display = 'block';
 
    // Add handlers for surah/ayat and annotation links
    await addSurahAyatLinkHandlers(modalBody);
 
-   // Close modal when clicking the X
-   modalClose.onclick = () => modal.style.display = 'none';
+   // Close modal when clicking the X (desktop and mobile)
+   const closeModal = () => modal.style.display = 'none';
+   
+   // Desktop click
+   modalClose.onclick = closeModal;
+   
+   // Mobile touch events
+   modalClose.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+   });
+   
+   modalClose.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeModal();
+   });
 
    // Simple state tracking
    let isDragging = false;

@@ -1174,6 +1174,35 @@ mark {
     resize: none;
     /* Disable resize on mobile */
   }
+  
+  /* Force scrollbar visibility on mobile */
+  .note-modal-body {
+    /* Force scrollbar to always show on mobile */
+    overflow-y: scroll !important;
+    /* Webkit scrollbar styling for mobile */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Make scrollbar more visible on mobile */
+  .note-modal-body::-webkit-scrollbar {
+    width: 12px !important;
+    background-color: #f0f0f0;
+  }
+  
+  .note-modal-body::-webkit-scrollbar-track {
+    background: #e0e0e0 !important;
+    border-radius: 6px;
+  }
+  
+  .note-modal-body::-webkit-scrollbar-thumb {
+    background: var(--accent, #007bff) !important;
+    border-radius: 6px;
+    border: 2px solid #f0f0f0;
+  }
+  
+  .note-modal-body::-webkit-scrollbar-thumb:active {
+    background: var(--accent-dark, #0056b3) !important;
+  }
 }
 
 .note-modal-header {

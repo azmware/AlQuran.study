@@ -1392,7 +1392,9 @@ async function init() {
 // Event bindings - Updated for new dropdown
 document.getElementById('gotoBtn')?.addEventListener('click', () => {
    const s = parseInt(document.getElementById('gotoSurah').value);
-   const a = parseInt(document.getElementById('gotoAyat').value);
+   const ayatValue = document.getElementById('gotoAyat').value;
+   const a = ayatValue && ayatValue.trim() !== '' ? parseInt(ayatValue) : 1; // Default to Ayat 1 if empty
+   
    if (isNaN(s) || s < 1 || s > 114) {
       alert('Surah should be between 1 and 114');
       return;
@@ -1605,6 +1607,36 @@ function renderTags(tags) {
                            (transHtml || '<i style="color:#9ca3af">[No translation found]</i>') +
                            (tr && tr.Translator ? ' <span class="trans-meta-translator">(' + tr.Translator + ')</span>' : '') +
                            '</div>';
+
+                        // Add navigation controls similar to search results
+                        const navControls = document.createElement('div');
+                        navControls.className = 'search-nav-controls';
+                        navControls.style.cssText = 'margin-top: 8px; display: flex; gap: 8px; align-items: center;';
+                        
+                        const gotoBtn = document.createElement('button');
+                        gotoBtn.className = 'goto-btn';
+                        gotoBtn.innerHTML = '→ Go to ' + surahNum + ':' + ayahNum;
+                        gotoBtn.style.cssText = 'background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em;';
+                        gotoBtn.onclick = (e) => {
+                           e.stopPropagation();
+                           loadSurah(surahNum, ayahNum);
+                        };
+                        
+                        const newWindowBtn = document.createElement('button');
+                        newWindowBtn.className = 'new-window-btn';
+                        newWindowBtn.innerHTML = '↗ New Window';
+                        newWindowBtn.style.cssText = 'background: var(--card-bg); color: var(--text); border: 1px solid var(--border); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em;';
+                        newWindowBtn.onclick = (e) => {
+                           e.stopPropagation();
+                           const url = new URL(window.location);
+                           url.searchParams.set('surah', surahNum);
+                           url.searchParams.set('ayat', ayahNum);
+                           window.open(url.toString(), '_blank');
+                        };
+                        
+                        navControls.appendChild(gotoBtn);
+                        navControls.appendChild(newWindowBtn);
+                        transCell.appendChild(navControls);
 
                         row.appendChild(arabicCell);
                         row.appendChild(transCell);
@@ -2004,14 +2036,43 @@ async function openNoteDialog(title, content) {
 
    // Close modal when clicking the X - handle both click and touch for mobile compatibility
    const closeModal = () => modal.style.display = 'none';
+   
+   // Handle desktop clicks
    modalClose.onclick = closeModal;
-   modalClose.ontouchend = (e) => {
+   
+   // Handle mobile touches - use both touchstart and touchend for better compatibility
+   let touchStarted = false;
+   modalClose.addEventListener('touchstart', (e) => {
+      touchStarted = true;
       e.preventDefault();
-      closeModal();
-   };
+      e.stopPropagation();
+   });
+   
+   modalClose.addEventListener('touchend', (e) => {
+      if (touchStarted) {
+         touchStarted = false;
+         e.preventDefault();
+         e.stopPropagation();
+         closeModal();
+      }
+   });
 
+   // Track if resizing is happening
+   let isResizing = false;
+   // Listen for mousedown on the modal's resize handle (bottom-right corner)
+   modalContent.addEventListener('mousedown', function(e) {
+      // Only start resizing if near the bottom-right corner
+      const rect = modalContent.getBoundingClientRect();
+      if (e.clientX > rect.right - 24 && e.clientY > rect.bottom - 24) {
+         isResizing = true;
+      }
+   });
+   window.addEventListener('mouseup', function() {
+      isResizing = false;
+   });
    // Close modal when clicking outside - handle both click and touch events
    const closeOnOutsideClick = (e) => {
+      if (isResizing) return; // Don't close if resizing
       if (e.target === modal) {
          modal.style.display = 'none';
       }

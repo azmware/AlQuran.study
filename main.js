@@ -1939,67 +1939,26 @@ async function openNoteDialog(title, content) {
    // Close modal when clicking the X
    modalClose.onclick = () => modal.style.display = 'none';
 
-   // Track resize state to prevent accidental closing
+   // Simple state tracking
+   let isDragging = false;
    let isResizing = false;
-   let resizeTimeout = null;
+   let startX, startY, startLeft, startTop;
    const modalContent = document.getElementById('noteModalContent');
-   
-   // Monitor for resize events
-   if (modalContent) {
-      const resizeObserver = new ResizeObserver(() => {
-         isResizing = true;
-         clearTimeout(resizeTimeout);
-         // Reset resize state after a short delay
-         resizeTimeout = setTimeout(() => {
-            isResizing = false;
-         }, 300);
-      });
-      resizeObserver.observe(modalContent);
-      
-      // Also track mouse events on resize handle area
-      modalContent.addEventListener('mousedown', (e) => {
-         const rect = modalContent.getBoundingClientRect();
-         const isInResizeArea = e.clientX > rect.right - 60 && e.clientY > rect.bottom - 60;
-         if (isInResizeArea) {
-            isResizing = true;
-            clearTimeout(resizeTimeout);
-         }
-      });
-      
-      // Reset resize state on mouse up
-      document.addEventListener('mouseup', () => {
-         if (isResizing) {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-               isResizing = false;
-            }, 200);
-         }
-      });
-      
-      // Clean up observer when modal closes
-      const originalCloseHandler = modalClose.onclick;
-      modalClose.onclick = () => {
-         resizeObserver.disconnect();
-         modal.style.display = 'none';
-      };
-   }
 
-   // Close modal when clicking outside (but not during resize)
+   // Close modal when clicking outside (but not during interaction)
    modal.onclick = (e) => {
-      if (e.target === modal && !isResizing) {
+      if (e.target === modal && !isDragging && !isResizing) {
          modal.style.display = 'none';
       }
    };
 
-   // Make modal draggable
-   let isDragging = false;
-   let startX, startY, startLeft, startTop;
-
+   // Make modal draggable (desktop and mobile)
    const modalHeader = document.getElementById('noteModalHeader');
-   if (modalHeader) {
-      modalHeader.onmousedown = function (e) {
+   if (modalHeader && modalContent) {
+      
+      // Mouse events for desktop
+      modalHeader.addEventListener('mousedown', function (e) {
          isDragging = true;
-         const modalContent = document.getElementById('noteModalContent');
          startX = e.clientX;
          startY = e.clientY;
          const rect = modalContent.getBoundingClientRect();
@@ -2007,25 +1966,84 @@ async function openNoteDialog(title, content) {
          startTop = rect.top;
          document.body.style.userSelect = 'none';
          e.preventDefault();
-      };
+      });
+
+      // Touch events for mobile
+      modalHeader.addEventListener('touchstart', function (e) {
+         isDragging = true;
+         const touch = e.touches[0];
+         startX = touch.clientX;
+         startY = touch.clientY;
+         const rect = modalContent.getBoundingClientRect();
+         startLeft = rect.left;
+         startTop = rect.top;
+         document.body.style.userSelect = 'none';
+         e.preventDefault();
+      }, { passive: false });
    }
 
-   document.onmousemove = function (e) {
+   // Mouse move for desktop
+   document.addEventListener('mousemove', function (e) {
       if (!isDragging) return;
-      const modalContent = document.getElementById('noteModalContent');
-      if (modalContent) {
-         const newLeft = startLeft + e.clientX - startX;
-         const newTop = startTop + e.clientY - startY;
-         modalContent.style.left = newLeft + 'px';
-         modalContent.style.top = newTop + 'px';
-         modalContent.style.transform = 'none';
-      }
-   };
+      const newLeft = startLeft + e.clientX - startX;
+      const newTop = startTop + e.clientY - startY;
+      modalContent.style.left = newLeft + 'px';
+      modalContent.style.top = newTop + 'px';
+      modalContent.style.transform = 'none';
+   });
 
-   document.onmouseup = function () {
+   // Touch move for mobile
+   document.addEventListener('touchmove', function (e) {
+      if (!isDragging) return;
+      const touch = e.touches[0];
+      const newLeft = startLeft + touch.clientX - startX;
+      const newTop = startTop + touch.clientY - startY;
+      modalContent.style.left = newLeft + 'px';
+      modalContent.style.top = newTop + 'px';
+      modalContent.style.transform = 'none';
+      e.preventDefault();
+   }, { passive: false });
+
+   // End dragging
+   function stopDragging() {
       isDragging = false;
       document.body.style.userSelect = '';
-   };
+   }
+
+   document.addEventListener('mouseup', stopDragging);
+   document.addEventListener('touchend', stopDragging);
+
+   // Handle resize area interactions
+   if (modalContent) {
+      // Track resize area interactions
+      modalContent.addEventListener('mousedown', function(e) {
+         const rect = modalContent.getBoundingClientRect();
+         const isInResizeArea = e.clientX > rect.right - 60 && e.clientY > rect.bottom - 60;
+         if (isInResizeArea) {
+            isResizing = true;
+            e.stopPropagation(); // Prevent drag
+         }
+      });
+
+      modalContent.addEventListener('touchstart', function(e) {
+         const rect = modalContent.getBoundingClientRect();
+         const touch = e.touches[0];
+         const isInResizeArea = touch.clientX > rect.right - 60 && touch.clientY > rect.bottom - 60;
+         if (isInResizeArea) {
+            isResizing = true;
+            e.stopPropagation(); // Prevent drag
+         }
+      });
+
+      // Reset resize state
+      document.addEventListener('mouseup', () => {
+         setTimeout(() => { isResizing = false; }, 100);
+      });
+
+      document.addEventListener('touchend', () => {
+         setTimeout(() => { isResizing = false; }, 100);
+      });
+   }
 }
 
 // Helper function to load and display reference content

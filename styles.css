@@ -1174,37 +1174,68 @@ mark {
 
 /* Enhanced resize handle for better mobile experience */
 .note-modal-content::after {
-  content: '⋮⋮⋮';
+  content: '↘';
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, transparent 30%, rgba(0, 123, 255, 0.1) 30%, rgba(0, 123, 255, 0.2) 70%, transparent 70%);
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, transparent 20%, rgba(0, 123, 255, 0.15) 20%, rgba(0, 123, 255, 0.25) 80%, transparent 80%);
   cursor: se-resize;
-  z-index: 1000;
+  z-index: 1001;
   border-bottom-right-radius: var(--radius);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--accent, #007bff);
-  transform: rotate(45deg);
-  opacity: 0.7;
+  opacity: 0.8;
   transition: all 0.2s ease;
+  pointer-events: auto;
+  touch-action: none;
 }
 
 .note-modal-content:hover::after {
   opacity: 1;
-  background: linear-gradient(135deg, transparent 25%, rgba(0, 123, 255, 0.15) 25%, rgba(0, 123, 255, 0.3) 75%, transparent 75%);
+  background: linear-gradient(135deg, transparent 15%, rgba(0, 123, 255, 0.2) 15%, rgba(0, 123, 255, 0.4) 85%, transparent 85%);
+  transform: scale(1.1);
 }
 
-/* Even larger resize area for mobile */
+/* Even larger and more visible resize area for mobile */
 @media (max-width: 768px) {
   .note-modal-content::after {
-    width: 60px;
-    height: 60px;
-    font-size: 16px;
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+    opacity: 0.9;
+    background: linear-gradient(135deg, transparent 15%, rgba(0, 123, 255, 0.2) 15%, rgba(0, 123, 255, 0.35) 85%, transparent 85%);
+  }
+  
+  .note-modal-content:hover::after {
+    transform: scale(1.05);
+  }
+}
+
+/* Add a subtle border to make resize area more visible */
+.note-modal-content::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  border-right: 2px solid rgba(0, 123, 255, 0.3);
+  border-bottom: 2px solid rgba(0, 123, 255, 0.3);
+  z-index: 999;
+  pointer-events: none;
+  border-bottom-right-radius: var(--radius);
+}
+
+@media (max-width: 768px) {
+  .note-modal-content::before {
+    width: 30px;
+    height: 30px;
+    border-width: 3px;
   }
 }
 

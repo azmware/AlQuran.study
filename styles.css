@@ -887,11 +887,17 @@ mark {
 
   .arabic-cell {
     font-size: 22px;
+    align-self: flex-end !important;
+    width: 100%;
   }
 
   .trans-cell {
     font-size: 15px;
     margin-left: 0px;
+    text-align: left !important;
+    direction: ltr !important;
+    align-self: flex-start !important;
+    width: 100%;
   }
 
   .main-controls {
@@ -1023,7 +1029,7 @@ mark {
 .trans-meta-translator {
   color: #9ca3af;
   font-size: calc(1em - 3pt);
-  margin-left: 8px;
+  display: block;
 }
 
 /* copy link button */
@@ -1171,7 +1177,7 @@ mark {
     width: 95%;
     max-width: none;
     max-height: 90vh;
-    resize: none;
+    /* resize: none; */
     /* Disable resize on mobile */
   }
   

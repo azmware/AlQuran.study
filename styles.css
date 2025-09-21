@@ -542,7 +542,7 @@ body {
 .reader {
   flex: 1;
   background: var(--card);
-  padding: 8px 4px;
+  padding: 8px 12px;
   border-radius: var(--radius);
   height: calc(100vh - 120px);
   overflow: auto;
@@ -975,7 +975,7 @@ mark {
   gap: 8px;
   align-items: flex-start;
   margin: 4px 0;
-  padding: 6px 4px;
+  padding: 6px 8px;
   border-radius: 10px;
   background: linear-gradient(180deg, #fff, #f6fafd);
   border: 1px solid var(--border);
@@ -1005,20 +1005,26 @@ mark {
   font-size: 32px;
   line-height: 2;
   color: #22223b;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .trans-cell {
   direction: ltr;
   text-align: left;
-  margin-left: 15px;
+  margin-left: 8px;
   font-size: 18px;
   line-height: 1.7;
   color: #22223b;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .trans-text {
   display: inline-block;
   width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .cell-meta {
